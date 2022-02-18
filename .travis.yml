@@ -1,5 +1,15 @@
+sudo: false
 language: java
 jdk:
-    - openjdk11
-after_success:
-  - mvn clean cobertura:cobertura coveralls:report
+  - openjdk10
+  - oraclejdk8
+  - openjdk7
+cache:
+  directories:
+    - "$HOME/.m2/repository"
+before_cache:
+  - rm -rf $HOME/.m2/repository/com/opengamma/elsql
+install:
+  - mvn --version
+script:
+  - mvn install -e -B -Dstrict

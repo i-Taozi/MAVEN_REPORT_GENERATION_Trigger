@@ -1,169 +1,120 @@
-<img src="pf4j-logo.svg" width="250"/>
+ElSql
+=====
 
-Plugin Framework for Java (PF4J)
-=====================
-[![Join the chat at https://gitter.im/decebals/pf4j](https://badges.gitter.im/decebals/pf4j.svg)](https://gitter.im/decebals/pf4j?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Travis CI Build Status](https://travis-ci.org/pf4j/pf4j.png)](https://travis-ci.org/pf4j/pf4j)
-[![Coverage Status](https://coveralls.io/repos/pf4j/pf4j/badge.svg?branch=master&service=github)](https://coveralls.io/github/pf4j/pf4j?branch=master)
-[![Maven Central](http://img.shields.io/maven-central/v/org.pf4j/pf4j.svg)](http://search.maven.org/#search|ga|1|pf4j)
+[![Build Status](https://travis-ci.org/OpenGamma/ElSql.svg?branch=master)](https://travis-ci.org/OpenGamma/ElSql)
+[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-A plugin is a way for a third party to extend the functionality of an application. A plugin implements extension points
-declared by application or other plugins. Also a plugin can define extension points.  
+Manage SQL external to a Java application.
 
-**NOTE:** Starting with version 0.9 you can define an extension directly in the application jar (you're not obligated to put the extension in a plugin - you can see this extension as a default/system extension). See [WhazzupGreeting](https://github.com/pf4j/pf4j/blob/master/demo/app/src/main/java/org/pf4j/demo/WhazzupGreeting.java) for a real example.  
+ElSql. Short for "External SQL".
+Pronounced "else-Q-L" where the letters are pronounced quicker than the "else".
 
-Features/Benefits
--------------------
-With PF4J you can easily transform a monolithic java application in a modular application.  
-PF4J is an open source (Apache license) lightweight (around __100 KB__) plugin framework for java, with minimal dependencies (only slf4j-api) and very extensible (see `PluginDescriptorFinder` and `ExtensionFinder`).   
+Available in [Maven Cental](http://search.maven.org/#search|ga|1|a%3A%22elsql%22)
+with **no dependencies**.
+Read the [user guide](https://github.com/OpenGamma/ElSql/wiki/User-guide) on the
+[wiki](https://github.com/OpenGamma/ElSql/wiki/Home).
 
-Practically PF4J is a microframework and the aim is to keep the core simple but extensible. I try to create a little ecosystem (extensions) based on this core with the help of the comunity.  
-For now are available these extensions:
-- [pf4j-update](https://github.com/pf4j/pf4j-update) (update mechanism for PF4J)
-- [pf4j-spring](https://github.com/pf4j/pf4j-spring) (PF4J - Spring Framework integration)
-- [pf4j-wicket](https://github.com/pf4j/pf4j-wicket) (PF4J - Wicket integration)
-- [pf4j-web](https://github.com/pf4j/pf4j-web) (PF4J in web applications)
 
-No XML, only Java.
+Overview
+--------
+There are a number of techniques for creating SQL within a Java application.
+Choosing one as opposed to another can make a significant difference to the feel of coding the application.
 
-You can mark any interface or abstract class as an extension point (with marker interface ExtensionPoint) and you specified that an class is an extension with @Extension annotation.
+The main techniques are:
+* an Object Relational Mapper framework, such as JPA or Hibernate
+* appending Strings, such as sql = `"SELECT foo " + "FROM bar " + "WHERE ..."`
+* using a fluent API library, with methods like `select("foo").from("bar").where(..)`
+* reading in an external file, such as a properties file
 
-Also, PF4J can be used in web applications. For my web applications when I want modularity I use [pf4j-wicket](https://github.com/pf4j/pf4j-wicket).
+This library focuses on the last of these - using an external file.
+It is a standalone library with no dependencies.
+The key benefit is a simple external file that a DBA can understand, something
+which is invaluable for later maintenance and debugging.
 
-Components
--------------------
-- **Plugin** is the base class for all plugins types. Each plugin is loaded into a separate class loader to avoid conflicts.
-- **PluginManager** is used for all aspects of plugins management (loading, starting, stopping). You can use a built-in implementation as `JarPluginManager`, `ZipPluginManager`, `DefaultPluginManager` (it's a `JarPluginManager` + `ZipPluginManager`) or you can implement a custom plugin manager starting from `AbstractPluginManager` (implement only factory methods).
-- **PluginLoader** loads all information (classes) needed by a plugin.
-- **ExtensionPoint** is a point in the application where custom code can be invoked. It's a java interface marker.   
-Any java interface or abstract class can be marked as an extension point (implements `ExtensionPoint` interface).
-- **Extension** is an implementation of an extension point. It's a java annotation on a class.
+The file format is essentially a DSL with a very small number of tags that handle the
+common difficult cases. The file has the suffix ".elsql":
 
-**PLUGIN** = a container for **EXTENSION POINTS** and **EXTENSIONS** + lifecycle methods (start, stop, delete)
+     -- an example comment
+     @NAME(SelectBlogs)
+       @PAGING(:paging_offset,:paging_fetch)
+         SELECT @INCLUDE(CommonFields)
+         FROM blogs
+         WHERE id = :id
+           @AND(:date)
+             date > :date
+           @AND(:active)
+             active = :active
+         ORDER BY title, author
+     @NAME(CommonFields)
+       title, author, content
 
-A **PLUGIN** is similar with a **MODULE** from other systems. If you don't need lifecycle methods (hook methods for start, stop, delete) you are not forced to supply a plugin class (the `PluginClass` property from the plugin descriptor is optional). You only need to supply some description of plugin (id, version, author, ...) for a good tracking (your application wants to know who supplied the extensions or extensions points).
+* the application looks up and refers to the "SelectBlogs" block of external SQL
+* two dashes are used for comments
+* tags start with the @ symbol
+* the primary blocks are @NAME(name) - the name refers to the block
+* indentation is used to create blocks - indented lines "belong" to the parent less-indented line
+* variables start with a colon
+* the various tags aim to handle over 80% of your needs
 
-How to use
--------------------
-It's very simple to add pf4j in your application.
+It is not intended that the DSL format should handle all cases, as that would be too complex.
+The most complex cases should probably be dealt with in normal Java code.
+The file can also be [overridden in parts](https://github.com/OpenGamma/ElSql/wiki/Configuration),
+which allows weird database SQL syntaxes to be handled.
 
-Define an extension point in your application/plugin using **ExtensionPoint** interface marker:
 
-```java
-public interface Greeting extends ExtensionPoint {
+Usage
+-----
 
-    String getGreeting();
-
-}
-```
-
-Create an extension using `@Extension` annotation:
- 
-```java
-@Extension
-public class WelcomeGreeting implements Greeting {
-
-    public String getGreeting() {
-        return "Welcome";
-    }
-
-}
-```
-
-Create (it's __optional__) a `Plugin` class if you are interested for plugin's lifecycle events (start, stop, ...):
+The library can be used with no dependencies.
+To do this, use the `ElSql` class as the main entry point.
 
 ```java
-public class WelcomePlugin extends Plugin {
-
-    public WelcomePlugin(PluginWrapper wrapper) {
-        super(wrapper);
-
-        // you can use "wrapper" to have access to the plugin context (plugin manager, descriptor, ...)
-    }
-
-    @Override
-    public void start() {
-        System.out.println("WelcomePlugin.start()");
-    }
-
-    @Override
-    public void stop() {
-        System.out.println("WelcomePlugin.stop()");
-    }
-    
-    @Override
-    public void delete() {
-        System.out.println("WelcomePlugin.delete()");
-    }
-    
-}
+ ElSql bundle = ElSql.of(ElSqlConfig.HSQL, MyDao.class);
+ String sql = bundle.getSql("InsertCustomer", mapOfSqlParameters);
 ```
 
-In above code I created a plugin (welcome) that comes with one extension for the `Greeting` extension point.
+This loads the .elsql files for the HSQL database associated with the `MyDao` class.
+It expects to find the .elsql files on the classpath in the same package as `MyDao`.
 
-You can distribute you plugin as a jar file (the simple solution). In this case add the plugin's metadata in `MANIFEST.MF` file of jar:
+Built in support is also provided for Spring via the `Resource` and `SqlParameterSource` abstractions.
+This is via an optional dependency in the Maven pom.
+To use this, use the `ElSqlBundle` class as the main entry point instead of `ElSql`.
 
-```
-Manifest-Version: 1.0
-Archiver-Version: Plexus Archiver
-Created-By: Apache Maven
-Built-By: decebal
-Build-Jdk: 1.6.0_17
-Plugin-Class: org.pf4j.demo.welcome.WelcomePlugin
-Plugin-Dependencies: x, y, z
-Plugin-Id: welcome-plugin
-Plugin-Provider: Decebal Suiu
-Plugin-Version: 0.0.1
-```
+The colon prefixed variables used by ElSql can be interpreted by other tools,
+such as [JDBI](http://jdbi.org/) and [Spring](http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/jdbc.html).
 
-In above manifest I described a plugin with id `welcome-plugin` (mandatory attribute), with class `org.pf4j.demo.welcome.WelcomePlugin` (optional attribute), with version `0.0.1` (mandatory attribute) and with dependencies
-to plugins `x, y, z` (optional attribute).
 
-Now you can play with plugins and extensions in your code:
+Motivation
+----------
+While many find JPA and Hibernate type solutions to be suitable for them, they are not ones that
+your author has ever been overly enthused about. Adding a new abstraction between two views of the
+world - object and relational - often leads to tricky corner cases and complications.
+For the simple cases straight SQL is quick and simple.
+For the hardest cases you generally need to write the SQL anyway.
+It is fair to ask if there enough middle ground to justify learning and using the tool.
 
-```java
-public static void main(String[] args) {
-    ...
+Appending strings to build SQL is something best avoided if possible. It makes it very hard to
+extract the actual SQL by the DBA for later change. A fluent library neatens up the string generation,
+but still deeply encodes the SQL within the Java application.
 
-    // create the plugin manager
-    PluginManager pluginManager = new JarPluginManager(); // or "new ZipPluginManager() / new DefaultPluginManager()"
-    
-    // start and load all plugins of application
-    pluginManager.loadPlugins();
-    pluginManager.startPlugins();
+Instead of these approaches, the author wanted the simplest possible library to store and manage a
+file full of SQL (or near SQL). By defining a very simple DSL that integrates naturally into the SQL,
+both DBAs and developers can understand the same file and work with it.
+Since no such small and isolated library could be found, one was written.
 
-    // retrieve all extensions for "Greeting" extension point
-    List<Greeting> greetings = pluginManager.getExtensions(Greeting.class);
-    for (Greeting greeting : greetings) {
-        System.out.println(">>> " + greeting.getGreeting());
-    }
-    
-    // stop and unload all plugins
-    pluginManager.stopPlugins();
-    pluginManager.unloadPlugins();
-    
-    ...
-}
-```
+Bear in mind however, that ElSql requires developers to (a) know SQL and (b) write the logic to
+convert objects to and from JDBC. The solution is not for everyone, but if you need the ability
+to control your SQL fully, potentially across multiple databases, then it may be the solution for you.
 
-The output is:
 
-```
->>> Welcome
-```
+Links
+-----
+Some useful project links:
 
-PF4J is very customizable and comes with a lot of goodies. Please read the documentation to discover yourself the power of this library.
+* [User guide](https://github.com/OpenGamma/ElSql/wiki/User-guide) - a longer user guide
+* [Wiki](https://github.com/OpenGamma/ElSql/wiki/Home) - including an [example](https://github.com/OpenGamma/ElSql/wiki/Example)
+* [Javadoc](http://opengamma.github.com/ElSql/apidocs/index.html) - the six public classes
+* [Issue tracker](https://github.com/OpenGamma/ElSql/issues) - raise bugs or enhancement requests here
+* [Project sponsor](https://opengamma.com/) - the project is supported by OpenGamma
 
-Documentation
----------------
-Documentation is available on [pf4j.org](http://www.pf4j.org)
-
-Demo
----------------
-Demo applications are available in [demo](https://github.com/pf4j/pf4j/tree/master/demo) folder
-
-Quickstart (call to action)
----------------
-1. Read this file to have an overview about what this project does
-2. Read [Getting started](https://pf4j.org/doc/getting-started.html) section of documentation to understand the basic concepts
-3. Read [Quickstart](https://pf4j.org/dev/quickstart.html) section of documentation to create your first PF4J-based modular application
+ElSql is licensed under the Apache License v2.
