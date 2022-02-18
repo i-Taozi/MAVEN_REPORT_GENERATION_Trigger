@@ -1,14 +1,8 @@
-.settings
-.idea
-*.iml
 target
-.project
-.classpath
-.checkstyle
-bin
-build.xml
-.DS_Store
-m2e-wtp
+.settings
 
-# btm transaction
-*.tlog
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
