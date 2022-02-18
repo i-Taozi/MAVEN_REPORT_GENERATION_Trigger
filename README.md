@@ -1,53 +1,99 @@
-[![Build Status](https://travis-ci.org/geosolutions-it/jai-ext.svg?branch=master)](https://travis-ci.org/geosolutions-it/jai-ext)
-[ ![Codeship Status for geosolutions-it/jai-ext](https://codeship.com/projects/86e202f0-98df-0132-03ae-025e58d57d52/status?branch=master)](https://codeship.com/projects/63483) 
-[![Build Status](https://travis-ci.org/geosolutions-it/jai-ext.svg)](https://travis-ci.org/geosolutions-it/jai-ext)
-[![Build Status](http://build.geo-solutions.it/jenkins/buildStatus/icon?job=JAI-Ext-Master)](http://build.geo-solutions.it/jenkins/view/JAI/job/JAI-Ext-Master/)
-[![Build Status](http://winbuild.geo-solutions.it/jenkins/buildStatus/icon?job=JAI-Ext-Master-JDK7)](http://winbuild.geo-solutions.it/jenkins/view/JAI-Ext/job/JAI-Ext-Master-JDK7/)
-[![Build Status](http://build.geo-solutions.it/jenkins/buildStatus/icon?job=JAI-Ext-OpenJDK7)](http://build.geo-solutions.it/jenkins/view/JAI/job/JAI-Ext-OpenJDK7/)
-[![Coverage Status](https://coveralls.io/repos/geosolutions-it/jai-ext/badge.svg?branch=master)](https://coveralls.io/github/geosolutions-it/jai-ext?branch=master)
-[![Sputnik](https://sputnik.ci/conf/badge)](https://sputnik.ci/app#/builds/simboss/jai-ext)
+### This Project Has Moved
 
-JAI-EXT
-=======
+Please be aware that this fork has been officially superceded by one driven by MongoDB, Inc.
 
-JAI-EXT is an open-source project which aims to extend the [JAI](http://en.wikipedia.org/wiki/Java_Advanced_Imaging) API. JAI is an API which provides a set of high level objects for the image processing. One feature of the JAI API is the ability to process the images in a multithreaded environment; this functionality can be reached by calculating each image tile separately. JAI-EXT improves this API in three different ways:
-* adding more features to the existing operations, like the support for nodata
-* improving the performances of the existing operations
-* developing new operations
+As a consequence this fork is really not needed. You are strongly encouraged to adopt https://github.com/mongodb/morphia instead.
 
-More informations can be found at the [JAI-EXT Wiki](https://github.com/geosolutions-it/jai-ext/wiki)
+Bugs and improvements should be submitted to that project.
 
-# License
-The JAI-EXT project is licensed with the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+This project will remain here but not actively maintained.
 
-# Releases
+Once again, please visit https://github.com/mongodb/morphia from now on.
 
-Current release is [**1.0.11**](http://demo.geo-solutions.it/share/github/jai-ext/releases/1.0.X/1.0.11/). More informations about the releases can be found [here](https://github.com/geosolutions-it/jai-ext/wiki/Releases).
+### Basic Introduction
 
-# Getting Started
-Here the user can find a guide for executing a JAI-EXT operation and a brief description of the most important parameters to use:
-* [Fifteen minutes guide](https://github.com/geosolutions-it/jai-ext/wiki/Fifteen-minutes-Guide)
+Morphia provides an annotation-driven approach to mapping POJO based entities into and out of MongoDB. As such, Morphia is an ODM (or Object Document Mapper).
 
+To use, add Morphia to your Java SE or EE project alongside the mongo-java-driver (which Morphia depends on). Then, create POJOs representing your entities just like you would with JPA entities. Finally, either use Morphia's Datastore interface to store and retrieve entities, or hand that responsibility to a type-safe DAO that can extend from the shipped BasicDAO.
 
-# Getting Support
-## Mailing List
-We have created two public mailing lists for JAI-Ext one for Developers and one for Users, you can find their homepages here below:
+### Downloads
 
-* [**JAI-Ext Users Group**](https://groups.google.com/d/forum/jai-ext-users)
-* [**JAI-Ext Developers Group**](https://groups.google.com/d/forum/jai-ext-developers)
+*Jar files* are downloadable from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.jmkgreen.morphia%22).
 
-# Contributing
-We welcome contributions in any form:
+*Maven* users: Releases are available in Central. Snapshots are available via [OSS Sonatype](https://oss.sonatype.org).
 
-* pull requests for new features
-* pull requests for bug fixes
-* pull requests for documentation
-* funding for any combination of the above
+<table>
+	<tr>
+		<th colspan="2">Maven Dependency</td>
+	</tr>
+	<tr>
+		<td>Group ID</td><td>com.github.jmkgreen.morphia</td>
 
-For more information check [this](https://github.com/geosolutions-it/jai-ext/blob/master/CONTRIBUTING.md) page
+	</tr>
+		<td>Artifact ID</td><td>morphia</td>
+	</tr>
+	<tr>
+		<td>Version</td><td>1.2.3</td>
+	</tr>
+</table>
 
-## Professional Support
-JAI-Ext has been developed by [**GeoSolutions**](http://www.geo-solutions.it) as an internal effort to replace Oracle JAI operations which are basically unsupported at the time of writing. 
+You can paste the following into your pom.xml:
+```
+<dependency>
+    <groupId>com.github.jmkgreen.morphia</groupId>
+    <artifactId>morphia</artifactId>
+    <version>1.2.3</version>
+</dependency>
+```
 
+### Documentation
 
+The [wiki](https://github.com/jmkgreen/morphia/wiki) has quite a lot of good example code.
+It was copied over from the original GoogleCode site.
 
+Maven Site docs are [here](http://jmkgreen.github.com/morphia).
+
+JavaDoc packages are available for more detailed IDE-based help.
+
+GitHub gists are welcomed from contributors.
+
+### Testing
+
+jUnit tests form part of this project. If these are green, it's shippable!
+
+### Bugs / Support
+
+The original [Google Group](http://groups.google.com/group/morphia) remains active for discussion, although please take care to note if you are using the original project's code or the code from this fork.
+
+Please use the GitHub issues tracker to report problems and make requests. A jUnit test case illustrating a bug has a higher chance of getting a fix that a more vague text description of course.
+
+### Contributions
+
+Fork this project, do you work, and ask for a pull request!
+
+### Building
+
+You will need:
+
+* JDK 1.5 or better (1.6 and 1.7 are tested)
+* Mongod running on localhost, on the default port.
+
+### License
+
+Apache, v2.
+
+### History
+
+This project is a fork of http://code.google.com/p/morphia/, taken from SVN trunk at revision 1826 (Jul 2012). This original work was authored by Scott Hernandez et al.
+
+The intention of this fork is to:
+
+1. Improve the documentation
+2. Maintain compatibility with newer MongoDB driver releases
+3. Fix and improve the code
+
+### Travis Continuous Integration Build Status
+
+Hopefully this thing is routinely green. Travis-CI monitors new code to this project and tests it on a variety of JDKs.
+
+[![Build Status](https://secure.travis-ci.org/jmkgreen/morphia.png?branch=master)](https://travis-ci.org/jmkgreen/morphia)

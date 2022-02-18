@@ -1,3 +1,0 @@
-// Error - assignment to a constant
-M_PI = 0;
-

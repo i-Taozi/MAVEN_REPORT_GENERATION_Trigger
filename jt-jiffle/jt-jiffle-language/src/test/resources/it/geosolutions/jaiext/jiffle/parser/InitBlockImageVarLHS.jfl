@@ -1,9 +1,0 @@
-images {
-  src = read;
-}
-
-init {
-  src = 1;  // Error - image var
-}
-
-dummy = 42;

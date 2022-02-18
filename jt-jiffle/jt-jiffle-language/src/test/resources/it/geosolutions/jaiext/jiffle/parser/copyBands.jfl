@@ -1,3 +1,0 @@
-foreach (b in 0:src->bands) {
-    dst[b] = src[b];
-}
