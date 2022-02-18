@@ -1,30 +1,17 @@
-language: java
-
-dist: trusty
-
-sudo: required
-
-jdk:
-  - oraclejdk8
-  - openjdk8
-  - openjdk11
-
-before_script:
- - "echo $JAVA_OPTS"
- - "export JAVA_OPTS=-Xmx2048m"
- - "echo $JAVA_OPTS"
- - "ulimit -a"
- - "ulimit -u 2048"
- - "ulimit -a"
- - "umask 022"
- - "mkdir inputs"
-
 cache:
   directories:
   - $HOME/.m2
+addons:
+  apt:
+    packages:
+      - libxml2-utils
 
-notifications:
-  slack: ukwebarchive:oqbYOo0bd09bnSXn4hGR1aUk
+language: java
+jdk:
+    - openjdk8
+    - openjdk11
+    - openjdk14
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - export VERSION=$(echo "cat //*[local-name()='project']/*[local-name()='version']/text()" | xmllint --nocdata --shell pom.xml | sed '1d;$d')
+  - 'if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ "$VERSION" =~ \-SNAPSHOT$ ]]; then cp ./travis-settings.xml $HOME/.m2/settings.xml && mvn -DskipTests=true -B deploy; fi'
