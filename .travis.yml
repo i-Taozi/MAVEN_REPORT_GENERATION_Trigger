@@ -1,8 +1,8 @@
 language: java
-notifications:
-  email:
-    - asaf000@gmail.com
 jdk:
-  - oraclejdk7
-  - openjdk7
-  - openjdk6
+    - openjdk8
+    - openjdk11
+    - oraclejdk11
+notifications:
+    email: false
+sudo: false
