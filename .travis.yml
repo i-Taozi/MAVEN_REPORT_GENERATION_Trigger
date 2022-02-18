@@ -1,20 +1,13 @@
+# Use docker-based build environment (instead of openvz)
+sudo: false
+
 language: java
 
 jdk:
-  - oraclejdk8
+  - openjdk8
+  - openjdk11
+  - openjdk17
 
-os:
-  - linux
-  
-addons:
-  firefox: "latest"
-      
-script:
-  - mvn install -Dwebdriverextensions.disabledbrowsers=chrome -Dchrome.binary.path=/usr/bin/chromium-browser -Ptravis-ci
-  
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start" 
-  - "mkdir -p /tmp/webdriverextensions-maven-plugin/cache"
-  - "mkdir -p /tmp/webdriverextensions-maven-plugin/drivers"
-  - "mkdir -p /tmp/webdriverextensions-maven-plugin/temp"
+cache:
+  directories:
+    - '$HOME/.m2/repository'

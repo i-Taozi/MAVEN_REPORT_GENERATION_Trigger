@@ -1,1052 +1,282 @@
-[![Travis Build Status](https://travis-ci.org/webdriverextensions/webdriverextensions.svg?branch=master)](https://travis-ci.org/webdriverextensions/webdriverextensions) [![Maven Central](https://img.shields.io/maven-central/v/com.github.webdriverextensions/webdriverextensions.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Acom.github.webdriverextensions)
+Memory File System [![Build Status](https://app.travis-ci.com/marschall/memoryfilesystem.svg?branch=master)](https://app.travis-ci.com/marschall/memoryfilesystem) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.marschall/memoryfilesystem/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.marschall/memoryfilesystem) [![Javadocs](https://www.javadoc.io/badge/com.github.marschall/memoryfilesystem.svg)](https://www.javadoc.io/doc/com.github.marschall/memoryfilesystem)
+==================
+An in memory implementation of a [JSR-203](http://jcp.org/en/jsr/detail?id=203) (Java 7) file system for testing purposes.
 
-WebDriver Extensions
-===================
-
-WebDriver Extensions is designed to simplify Java based Selenium/WebDriver tests. It's built on top of Selenium/WebDriver to make your tests more readable, reusabable and maintainable by combining the [Page Object Pattern](https://code.google.com/p/selenium/wiki/PageObjects) and [Bot Pattern](https://code.google.com/p/selenium/wiki/BotStyleTests).
-
-Available through the [Maven Central Repository](http://mvnrepository.com/search?q=webdriverextensions)! Latest release is version 3.11.1 which includes selenium-java 3.141.59 as a transitive dependency.
-
-
-<br>
-
-### What's included in this framework?
-- A [Maven Plugin](https://github.com/webdriverextensions/webdriverextensions-maven-plugin#webdriver-extensions-maven-plugin) to manage, download and install drivers
-- [Annotation based JUnit Runner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) for running Selenium/WebDriver tests locally or remotely against multiple browsers
-- New classes for modelling your website e.g. [WebComponent](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebComponent.html) (an extendable WebElement), [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html), [WebSite](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebSite.html) and [WebRepository](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebRepository.html)
-- A [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) providing static methods for interacting, asserting and checking conditions of WebElements, WebComponents, WebPages and WebSites
-- A WebSite and WebRepository [generators](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/generator/package-summary.html) that enables adding WebComponents, WebPages, WebSites and WebRepositories by [annotations](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/generator/annotations/package-summary.html)
-- A [Maven Archetype](https://github.com/webdriverextensions/webdriverextensions-archetype-quickstart#webdriver-extension-archetype-quickstart) for creating new projects
-
-<br>
-
-### Want to Contribute?
-If you find a bug or have a feature request please [create a new GitHub issue](https://github.com/webdriverextensions/webdriverextensions/issues/new) or even better clone this repository, commit your changes and make a [Pull Request](https://help.github.com/articles/using-pull-requests/).
-
-<br>
-
-### Have any Questions?
-If you have question you can [ask them in a GitHub issue](https://github.com/webdriverextensions/webdriverextensions/issues/new).
-
-<br>
-
-# Content
-- [Hello World Example](#hello-world-example)
-    - [With WebDriver Extensions](#with-webdriver-extensions)
-    - [Without WebDriver Extensions](#without-webdriver-extensions)
-    - [Further increased readability with Groovy](#further-increased-readability-with-groovy)
-- [Getting Started](#getting-started)
-    - [Requirements](#requirements)
-    - [Use Maven to add WebDriver Extensions](#use-maven-to-add-webdriver-extensions)
-    - [Download and manage your drivers with the Maven Plugin](#download-and-manage-your-drivers-with-the-maven-plugin)
-    - [Speed up your tests by running them in parallel](#speed-up-your-tests-by-running-them-in-parallel)
-    - [Cross Browser test your website with the JUnitRunner](#cross-browser-test-your-website-with-the-junitrunner)
-    - [Model your website with the Page Object Pattern](#model-your-website-with-the-page-object-pattern)
-    - [Model your page components with the WebComponent](#model-your-page-components-with-the-webcomponent)
-    - [Make your test readable as instructions with the Bot Pattern](#make-your-test-readable-as-instructions-with-the-bot-pattern)
-    - [Create new projects with the Maven Archetype](#create-new-projects-with-the-maven-archetype)
-- [Javadoc](#javadoc)
-- [Changelog](#changelog)
-- [Contributors](#contributors)
-- [License](#license)
-
-
-
-<br>
-
-# Hello World Example
-Here is an example of how a cross browser test looks like with and without the WebDriver Extensions Framework. The test will run on Firefox, Chrome and Internet Explorer. It will google for "Hello World" and assert that the search result contains the searched text "Hello World".
-
-
-
-### With WebDriver Extensions
-```java
-@RunWith(WebDriverRunner.class)
-@Firefox
-@Chrome
-@InternetExplorer
-public class WebDriverExtensionsExampleTest {
-
-    // Model
-    @FindBy(name = "q")
-    WebElement queryInput;
-    @FindBy(name = "btnG")
-    WebElement searchButton;
-    @FindBy(id = "search")
-    WebElement searchResult;
-
-    @Test
-    public void searchGoogleForHelloWorldTest() {
-        open("http://www.google.com");
-        assertCurrentUrlContains("google");
-
-        type("Hello World", queryInput);
-        click(searchButton);
-
-        waitFor(3, SECONDS);
-        assertTextContains("Hello World", searchResult);
-    }
-}
-```
-_<sub>Imports are hidden for the sake of simplicity, for imports and instructions on how to run this example see this [gist](https://gist.github.com/andidev/ad006a454edfd9f0e9e5)</sub>_
-
-
-
-<br>
-
-### Without WebDriver Extensions
-```java
-@RunWith(Parameterized.class)
-public class WebDriverExampleTest {
-    WebDriver driver;
-    @Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-            {"Firefox"}, {"Chrome"}, {"InternetExplorer"}
-        });
-    }
-
-    public WebDriverTest(String browserName) {
-        if (browserName.equals("Firefox")) {
-            driver = new FirefoxDriver();
-        } else if (browserName.equals("Chrome")) {
-            driver = new ChromeDriver();
-        } else if (browserName.equals("InternetExplorer")) {
-            driver = new InternetExplorerDriver();
-        }
-        PageFactory.initElements(driver, this);
-    }
-
-    @After
-    public void tearDown() {
-        driver.quit();
-    }
-
-    // Model
-    @FindBy(name = "q")
-    WebElement queryInput;
-    @FindBy(name = "btnG")
-    WebElement searchButton;
-    @FindBy(id = "search")
-    WebElement searchResult;
-
-    @Test
-    public void searchGoogleForHelloWorldTest() throws InterruptedException {
-        driver.get("http://www.google.com");
-        assert driver.getCurrentUrl().contains("google");
-
-        queryInput.sendKeys("Hello World");
-        searchButton.click();
-
-        SECONDS.sleep(3);
-        assert searchResult.getText().contains("Hello World");
-    }
-}
-```
-_<sub>Imports are hidden for the sake of simplicity, for imports and instructions on how to run this example see this [gist](https://gist.github.com/andidev/6c5dc8033c019e4c069d)</sub>_
-
-
-As you can see WebDriver Extensions Framework made the test almost readable as instructions you would give to someone who needs to manually perform this test. This is one of the main points of this framework. It also removed a lot of verbose boilerplate configuration code.
-
-For the sake of simplicity this example does not demonstrate the [Page Object Pattern](https://code.google.com/p/selenium/wiki/PageObjects). Please keep on reading the [Getting Started](#getting-started) section to read more about how to create and use Page Objects.
-
-
-
-<br>
-
-### Further increased readability with Groovy
-If wanted one could further increase readability by using the Groovy language instead of Java. Then the Hello World example would look like this
-
-```groovy
-@Grab(group='com.github.webdriverextensions', module='webdriverextensions', version='3.11.1')
-@RunWith(WebDriverRunner)
-@Firefox
-@Chrome
-@InternetExplorer
-class WebDriverExtensionsGroovyExampleTest {
-
-    // Model
-    @FindBy(name = "q")
-    WebElement queryInput;
-    @FindBy(name = "btnG")
-    WebElement searchButton;
-    @FindBy(id = "search")
-    WebElement searchResult;
-
-    @Test
-    void searchGoogleForHelloWorldTest() {
-        open "http://www.google.com"
-        assertCurrentUrlContains "google"
-
-        type "Hello World", queryInput
-        click searchButton
-
-        waitFor 3, SECONDS
-        assertTextContains "Hello World", searchResult
-    }
-}
-```
-
-_<sub>Imports are hidden for the sake of simplicity, for imports and instructions on how to run this example see this [gist](https://gist.github.com/andidev/b182c59a92d5ad66b035)</sub>_
-
-Note that Groovy examples will not be covered by this document.
-
-
-
-<br>
-
-# Getting Started
-
-### Requirements
-The Selenium project is compiled with Java 8 since version 3.0.0. Therefore WebDriver Extensions also requires you to use Java 3 in version 3.0.0 and above.
-Maven is not a requirement but is preferred and referred to in this document.
-
-- Java 8 or above
-- Maven 3 or higher
-
-
-
-<br>
-
-### Use Maven to add WebDriver Extensions
-Add
 ```xml
 <dependency>
-	<groupId>com.github.webdriverextensions</groupId>
-	<artifactId>webdriverextensions</artifactId>
-	<version>3.11.1</version>
+    <groupId>com.github.marschall</groupId>
+    <artifactId>memoryfilesystem</artifactId>
+    <version>2.3.0</version>
 </dependency>
 ```
-...as a dependency in your [pom.xml](https://gist.github.com/andidev/ad006a454edfd9f0e9e5#file-pom-xml) file.
 
+ToC
+---
+* [Supported Features](#supported)
+* [Not Supported Features](#not-supported)
+* [FAQ](#faq)
+* [Usage](#usage)
+* [Guidelines for Testable File Code](#guidelines-for-testable-file-code)
 
-<br>
+Supported
+---------
+* <code>SeekableByteChannel</code>
+* <code>FileChannel</code>
+* <code>AsynchronousFileChannel</code>
+* <code>InputStream</code>
+* <code>OutputStream</code>
+* <code>BasicFileAttributeView</code>, <code>BasicFileAttributes</code>
+* <code>DosFileAttributeView</code>, <code>DosFileAttributes</code>
+* <code>PosixFileAttributeView</code>, <code>PosixFileAttributes</code>
+* <code>UserDefinedFileAttributeView</code>
+* <code>FileLock</code>
+* <code>DirectoryStream</code>
+* <code>PathMatcher</code>
+  * glob
+  * regex
+* <code>StandardCopyOption</code>
+  * REPLACE_EXISTING
+  * COPY_ATTRIBUTES
+  * ATOMIC_MOVE
+* <code>StandardOpenOption</code>
+  * READ
+  * WRITE
+  * TRUNCATE_EXISTING
+  * CREATE
+  * DELETE_ON_CLOSE
+* symbolic links
+* symbolic link loop detection
+* hard links
+* switching the current user
+* switching the current group
+* DOS access checks
+* POSIX access checks
+* [umask](http://en.wikipedia.org/wiki/Umask)
 
-### Download and manage your drivers with the [Maven Plugin](https://github.com/webdriverextensions/webdriverextensions-maven-plugin#webdriver-extensions-maven-plugin)
-There is no need to download any drivers manually. Instead use the [WebDriver Extensions Maven Plugin GitHub](https://github.com/webdriverextensions/webdriverextensions-maven-plugin) to download and manage your drivers by adding
+Not Supported
+-------------
+* `FileChannel#map`, `MappedByteBuffer` has final methods that call native methods
+* `SecureDirectoryStream`
+* `WatchService`
+* `FileTypeDetector`, has to be accessible by system classloader
+* faked DOS attribute view under Linux, totally unspecified
+* `UnixFileAttributeView`, [sun package](http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html), totally unspecified
+* `AclFileAttributeView`
+* files larger than 16MB
+* `StandardOpenOption`
+  * SPARSE
+  * SYNC
+  * DSYNC
+* `URL` interoperability, needs a custom `URLStreamHandler` which [ins't very nice](http://www.unicon.net/node/776). That means you can't for example create an `URLClassLoader` on a memory file system. However if you really want to create a `ClassLoader` on a memory file system you can use [path-classloader](https://github.com/marschall/path-classloader) which is completely portable across Java 7 file systems.
+* maximum path length checks
+* hard link count checks
+
+Version History
+---------------
+
+Version 2 requires Java 8 and supports nanosecond time resolution. Automatically set mtime, atime and ctime will have nanosecond resolution only with Java 9+.
+
+Version 1 requires Java 7.
+
+FAQ
+---
+### Does it have bugs?
+Quite likely.
+
+### What license is it?
+MIT
+
+### Does it support concurrent access?
+Yes, but hasn't been subject to much scrutiny so bugs are likely. 
+
+### Does it work with the zipfs provider?
+Not with the one that ships with the JDK 7 because of [bug 8004789](http://bugs.sun.com/view_bug.do?bug_id=8004789). However there's a [repackaged version](https://github.com/marschall/zipfilesystem-standalone) that fixes this bug and is compatible. It should work fine in JDK 8.
+
+### Is it production ready?
+No, it's only intended for testing purposes.
+
+### Does it scale?
+No
+
+### Does it have any dependencies?
+No
+
+### Does it support JDK 9?
+Yes, starting from version 0.9.2 the JAR is a [modular](https://github.com/marschall/memoryfilesystem/blob/master/src/main/java/module-info.java) JAR with the name `com.github.marschall.memoryfilesystem`. The only module required besides `java.base` is `java.annotation` which is [optional](http://openjdk.java.net/projects/jigsaw/spec/issues/#CompileTimeDependences).
+
+### Does it work with Spring?
+Yes, there is a POJO factory bean. It has been tested with Spring 3.2.4 but since it doesn't have any dependencies on Spring it should work with every ⩾ 2.x version. You can of course also use Java configuration or any other IoC container.
+
+### Does it work with OSGi?
+Yes, it's a bundle and there's an activator that prevents class loader leaks. You should use the `MemoryFileSystemBuilder` instead of `FileSystems#newFileSystem` because `ServiceLoader` uses the thread context class loader. `MemoryFileSystemBuilder` avoids this by passing in the correct class loader.
+
+### Does it do any logging?
+No
+
+### But I want all my file access logged
+A logging file system that wraps an other file system is the best way to do this.
+
+### How can I set the current user?
+Use `CurrentUser#useDuring`
+
+### How can I set the current group?
+Use `CurrentGroup#useDuring`
+
+### Can I run Lucene?
+Yes, starting with version 2.1 running Lucene is supported, see [LuceneRegressionTest](https://github.com/marschall/memoryfilesystem/blob/master/src/test/java/com/github/marschall/memoryfilesystem/LuceneRegressionTest.java). It is important you use the `#newLinux()` method on `MemoryFileSystemBuilder`.
+
+### Are there other similar projects?
+Yes, [google/jimfs](https://github.com/google/jimfs), [openCage/memoryfs](https://github.com/openCage/memoryfs) and [sbridges/ephemeralfs](https://github.com/sbridges/ephemeralfs) seem similar.
+
+### How does this compare to ShrinkWrap NIO.2?
+[ShrinkWrap NIO.2](http://exitcondition.alrubinger.com/2012/08/17/shrinkwrap-nio2/) seems to be mainly targeted at interacting with a ShrinkWrap archive instead of simulating a file system.
+
+Usage
+-----
+### Getting Started
+The easiest way to get started is to use the `MemoryFileSystemBuilder`
+
+```java
+try (FileSystem fileSystem = MemoryFileSystemBuilder.newEmpty().build()) {
+  Path p = fileSystem.getPath("p");
+  System.out.println(Files.exists(p));
+}
+```
+
+It's important to know that at any given time there can only be one memory file system with a given name. Any attempt to create a memory file system with the name of an existing one will throw an exception. 
+
+There are other `new` methods on `MemoryFileSystemBuilder` that allow you to create different file systems and other methods that allow you to customize the file system.
+
+### Next Steps JUnit 4
+You probably want to create a JUnit `TestRule` that sets up and tears down a file system for you. A rule can look like this
+
+```java
+final class FileSystemRule implements TestRule {
+
+  private FileSystem fileSystem;
+
+  FileSystem getFileSystem() {
+    return this.fileSystem;
+  }
+
+  @Override
+  public Statement apply(final Statement base, Description description) {
+    return new Statement() {
+
+      @Override
+      public void evaluate() throws Throwable {
+        fileSystem = MemoryFileSystemBuilder.newEmpty().build();
+        try {
+          base.evaluate();
+        } finally {
+          fileSystem.close();
+        }
+      }
+
+    };
+  }
+
+}
+```
+
+and is used like this
+```java
+public class FileSystemTest {
+
+  @Rule
+  public final FileSystemRule rule = new FileSystemRule();
+
+  @Test
+  public void lockAsyncChannel() throws IOException {
+    FileSystem fileSystem = this.rule.getFileSystem();
+
+    Path path = fileSystem.getPath("sample.txt");
+    assertFalse(Files.exists(path));
+  }
+
+}
+```
+
+It's important to note that the field holding the rule must be public.
+
+### Next Steps JUnit 5
+You probably want to create a JUnit extension that sets up and tears down a file system for you. A rule can look like this
+
+```java
+class FileSystemExtension implements BeforeEachCallback, AfterEachCallback {
+
+  private FileSystem fileSystem;
+
+  FileSystem getFileSystem() {
+    return this.fileSystem;
+  }
+
+  @Override
+  public void beforeEach(ExtensionContext context) throws Exception {
+    this.fileSystem = MemoryFileSystemBuilder.newEmpty().build("name");
+  }
+
+  @Override
+  public void afterEach(ExtensionContext context) throws Exception {
+    if (this.fileSystem != null) {
+      this.fileSystem.close();
+    }
+  }
+}
+```
+
+and is used like this
+```java
+class FileSystemTest {
+
+  @RegisterExtension
+  final FileSystemExtension extension = new FileSystemExtension();
+
+  @Test
+  public void lockAsyncChannel() throws IOException {
+    FileSystem fileSystem = this.extension.getFileSystem();
+
+    Path path = fileSystem.getPath("sample.txt");
+    assertFalse(Files.exists(path));
+  }
+
+}
+```
+
+If you're using an IoC container for integration tests check out the section below.
+
+### Spring
+The `com.github.marschall.memoryfilesystem.MemoryFileSystemFactoryBean` provides integration with Spring.
+
 ```xml
-<plugin>
-    <groupId>com.github.webdriverextensions</groupId>
-    <artifactId>webdriverextensions-maven-plugin</artifactId>
-    <version>3.1.1</version>
-    <executions>
-        <execution>
-            <goals>
-                <goal>install-drivers</goal>
-            </goals>
-        </execution>
-    </executions>
-    <configuration>
-        <drivers>
-            <driver>
-                <name>edgedriver</name>
-                <version>6.17134</version>
-            </driver>
-            <driver>
-                <name>internetexplorerdriver</name>
-                <version>3.9.0</version>
-            </driver>
-            <driver>
-                <name>chromedriver</name>
-                <version>74.0.3729.6</version>
-            </driver>
-            <driver>
-                <name>geckodriver</name>
-                <version>0.24.0</version>
-            </driver>
-            <driver>
-                <name>phantomjs</name>
-                <version>2.1.1</version>
-            </driver>
-        </drivers>
-    </configuration>
-</plugin>
-```
-...as a plugin in your [pom.xml](https://gist.github.com/andidev/ad006a454edfd9f0e9e5#file-pom-xml) file. Then simply just update the version tag of the driver when a new driver is available and re-run your tests with the `mvn test` command or your preferred IDE.
+  <bean id="memoryFileSystemFactory"
+      class="com.github.marschall.memoryfilesystem.MemoryFileSystemFactoryBean"/>
 
-The plugin will download the most suitable driver for  your OS. The bit of the driver will be 32bit with the exception of running the tests from a linux 64bit OS. If you would like to specify the OS and bit of the drivers to download you can provide them with a `<platform>` and `<bit>`-tag inside each `<driver>`-tag. Platform can be set to `windows`, `mac` or `linux` while the bit can be set to `32` or `64`.
-
-The drivers will placed in a folder called `drivers` in the project root. If you will use the provided [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) there is no need for passing driver paths as System Properties since the framework will take care of the for you. If you won't be using it make sure to point the drivers out manually.
-
-If you have configured a proxy in the settings.xml file the first encountered active proxy will be used. To specify a specific proxy to use you can provide the proxy id in the configuration.
-
-If you run your tests from eclipse make sure you've allowed the webdriverextensions-maven-plugin to run the install-drivers goal. You can do this by adding the following to your pom.xml
-```xml
-<pluginManagement>
-    <plugins>
-        <!--Eclipse m2e settings needed to install drivers with the webdriverextensions-maven-plugin -->
-        <plugin>
-            <groupId>org.eclipse.m2e</groupId>
-            <artifactId>lifecycle-mapping</artifactId>
-            <version>1.0.0</version>
-            <configuration>
-                <lifecycleMappingMetadata>
-                    <pluginExecutions>
-                        <pluginExecution>
-                            <pluginExecutionFilter>
-                                <groupId>com.github.webdriverextensions</groupId>
-                                <artifactId>webdriverextensions-maven-plugin</artifactId>
-                                <versionRange>[1.0,)</versionRange>
-                                <goals>
-                                    <goal>install-drivers</goal>
-                                </goals>
-                            </pluginExecutionFilter>
-                            <action>
-                                <execute>
-                                    <runOnIncremental>true</runOnIncremental>
-                                </execute>
-                            </action>
-                        </pluginExecution>
-                    </pluginExecutions>
-                </lifecycleMappingMetadata>
-            </configuration>
-        </plugin>
-    </plugins>
-</pluginManagement>
+  <bean id="memoryFileSystem" destroy-method="close"
+    factory-bean="memoryFileSystemFactory" factory-method="getObject"/>
 ```
 
-For more information on configuring the driver please visit the [WebDriver Extensions Maven Plugin GitHub page](https://github.com/webdriverextensions/webdriverextensions-maven-plugin). If the latest drivers are not available yet please create an issue [here](https://github.com/webdriverextensions/webdriverextensions-maven-plugin/issues/new).
+You can of course also write a [Java Configuration](http://static.springsource.org/spring/docs/4.0.x/spring-framework-reference/html/beans.html#beans-java) class and a `@Bean` method that uses `MemoryFileSystemBuilder` to create a new file system. Or a CDI class with a `@Produces` method that uses `MemoryFileSystemBuilder` to create a new file system. 
 
+By setting the "type" attribute to "windows", "linux" or "macos" you can control the semantics of the created file system.
 
+For more information check out the [Javadoc](http://www.javadoc.io/doc/com.github.marschall/memoryfilesystem).
 
-<br>
+Guidelines for Testable File Code
+================================
 
-### Speed up your tests by running them in parallel
-Run your tests in parallel by adding
-```xml
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <version>2.18.1</version>
-    <configuration>
-        <parallel>all</parallel>
-        <threadCount>10</threadCount>
-        <perCoreThreadCount>false</perCoreThreadCount>
-    </configuration>
-</plugin>
-```
-...to your pom.xml file.
+The following guidelines are designed to help you write code that can easily be tested using this project. In general code using the old `File` API has to moved over to the new Java 7 API.
 
-This configuration will run maximum 10 tests in parallel. For more information
-about the configuration please see section [Fork Options and Parallel Test Execution](http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html) in the documentation of the [Maven Surefire Plugin](http://maven.apache.org/surefire/maven-surefire-plugin/index.html).
+* Inject a `Path` or `FileSystem` instance into the object doing the file handling. This allows you to pass in an instance of a memory file system when testing and an instance of the default file system when running in production. You can always the the file system of a path by using `Path#getFileSystem()`.
+* Don't use `File`, `FileInputStream`, `FileOutputStream`, `RandomAccessFile` and `Path#toFile()`. These classes are hard wired to the default file system.
+  * Use `Path` instead of `File`.
+  * Use `SeekableByteChannel` instead of `RandomAccessFile`. Use `Files#newByteChannel` to create an instance of `SeekableByteChannel`.
+  * Use `Files#newInputStream` and `Files#newOutputStream` to create `InputStream`s and `OutputStream`s on files.
+  * Use `FileChannel#open` instead of `FileInputStream#getChannel()`, `FileOutputStream#getChannel()`, or `RandomAccessFile#getChannel()` to create a `FileChannel`
+* Use `FileSystem#getPath(String, String...)` instead of `Paths#get(String, String...)` to create a `Path` instance because the latter creates an instance on the default file system.
 
-Try not to use non final static variables within your tests if you run your tests in parallel.
-If you really have to use static variables that are not defined as final make sure to wrap them
-in [InheritableThreadLocal](http://docs.oracle.com/javase/7/docs/api/java/lang/InheritableThreadLocal.html)
-objects. In this way they will be static within the current thread and child threads (i.e. the current test).
 
-Also before configuring to run your tests in parallel check that your website
-allows it. For example problems could occur when logging in with the same user
-at the same time (if your website supports a login functionality). There could
-also be other reasons not to run tests in parallel.
+Building
+--------
 
-
-
-<br>
-
-### Cross Browser test your website with the JUnitRunner
-
-Run your tests locally by using the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html)
-
-```java
-import com.github.webdriverextensions.junitrunner.WebDriverRunner;
-import com.github.webdriverextensions.junitrunner.annotations.*;
-
-@RunWith(WebDriverRunner.class)
-@Firefox
-@Chrome
-@InternetExplorer
-@Edge
-@PhantomJS
-public class CrossBrowserTest {
-
-    // Add WebElements, WebPages and other supported web models to use in tests
-
-    @Test
-    public void test1() {
-        // Configure browsers to test by annotating the class
-    }
-
-    @Test
-    @Safari
-    public void test2() {
-        // ...or by annotating methods
-    }
-
-    @Test
-    @IgnoreInternetExplorer
-    public void test3() {
-        // ...and use the ignore annotations to ignore specific browsers
-    }
-
-    ...
-
-}
-```
-
-...or remotely by adding the [@RemoteAddress](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/RemoteAddress.html) annotaion
-
-```java
-@RunWith(WebDriverRunner.class)
-@RemoteAddress("http://your-remote-url")
-@Firefox
-@Chrome
-@InternetExplorer
-@Edge
-@PhantomJS
-public class CrossBrowserTest {
-	...
-}
-```
-
-To run your test headless without starting a browser, use the [@HtmlUnit](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/HtmlUnit.html) annotation. If wanted you can also run your tests against the Safari browser with the [@Safari](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/Safari.html) annotation (just make sure the chromedriver is installed). Note that there is currently a [WebDriver issue](https://code.google.com/p/selenium/issues/detail?id=7933) with running the SafariDriver on some OSX/Safari versions.
-
-Browser `version` and `platform` settings can be passed as annotation parameters e.g. `@Firefox(version = "35.0", platform = Platform.MAC)`.
-
-The desired capabilities can either be provided in JSON format as a string e.g. `@Chrome(desiredCapabilities = "{ chromeOptions: { args: [''--start-maximized'] }")` or by creating a new class that extends the WebDriver's `DesiredCapabilities` class
-```java
-public class StartMaximized extends DesiredCapabilities {
-    public StartMaximized() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        setCapability(ChromeOptions.CAPABILITY, options);
-    }
-}
-```
-...and passing that to the annotation e.g. `@Chrome(desiredCapabilitiesClass = StartMaximized.class)`.
-
-If you want set a custom browser name this can be done by using the [@Browser](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/Browser.html) annotation e.g. `Browser(browserName = "foo")`.
-
-For larger and more complex test grids the [@Browsers](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/Browsers.html) annotation can be used. For example to test the Firefox browser on Windows, Mac and Linux
-```java
-@Browsers(firefox = {
-    @Firefox(platform = Platform.WINDOWS),
-    @Firefox(platform = Platform.MAC),
-    @Firefox(platform = Platform.LINUX)
-})
-```
-
-If you would like to use a custom driver path annotate the test with the  [@DriverPaths](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/DriverPaths.html) annotation, e.g.
-
-```java
-@DriverPaths(chrome="path/to/chromedriver", internetExplorer ="path/to/internetexplorerdriver")
-```
-
-If you want to run your test against 64bit Internet Explorer versions you can specify the path to the 64 bit driver with the [@DriverPaths](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/DriverPaths.html) annotation like this
-```java
-@DriverPaths(internetExplorer ="drivers/internetexplorerdriver-windows-64bit.exe")
-```
-another way to do it is to set the `webdriverextensions.ie.driver.use64Bit` to `true`, e.g. when running the tests with maven: `mvn test -Dwebdriverextensions.ie.driver.use64Bit=true`.
-
-To take screenshots on test failure annotate the test class with the [@TakeScreenshotOnFailure](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/TakeScreenshotOnFailure.html). The screenshots will be saved into a directory named `screenshots` located in the project root. The path to the screenshots directory can be configured either by annotating the test class with the  [@ScreenshotsPath](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/ScreenshotsPath.html) annotation or by setting the `webdriverextensions.screenshotspath` property. E.g.
-
-```java
-@RunWith(WebDriverRunner.class)
-@Firefox
-@TakeScreenshotOnFailure
-@ScreenshotsPath("path/to/screenshots")
-public class SomeTest {
-	...
-}
-```
-
-The implicitly wait for tests can be set by annotating test classes or methods with the [@ImplicitlyWait](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/annotations/ImplicitlyWait.html) annotation. E.g.
-
-```java
-@RunWith(WebDriverRunner.class)
-@Firefox
-@ImplicitlyWait(1)
-public class SomeTest {
-    @Test
-    public void somethingToTest() {
-        // Implicittly wait is set to one second
-    }
-    @Test
-    @ImplicitlyWait(value = 1, unit = MINUTES)
-    public void somethingElseToTest() {
-        // Implicittly wait is set to one minute
-    }
-}
-```
-
-To set other driver specific setting use the JUnit @Before annotation. The driver
-can be retreived by using the [driver()](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html#driver--) method in the [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) class. E.g.
-
-```java
-@RunWith(WebDriverRunner.class)
-@Firefox
-public class SomeTest {
-    @Before
-    public void configure() {
-        driver().manage().timeouts().pageLoadTimeout(10, SECONDS);
-    }
-    ...
-}
-```
-
-<br>
-
-### Model your website with the [Page Object Pattern](https://code.google.com/p/selenium/wiki/PageObjects)
-
-Model your website pages, e.g. a login page
-
-```html
-<html>
-    <head>
-        <title>Login Page</title>
-    </head>
-    <body>
-        <form>
-            <label>Username</label> <input name="username">
-            <label>Password</label> <input name="password">
-            <input type="checkbox" name="remember-me"> Remember me
-            <button id="login-button">Login</button>
-        </form>
-    </body>
-</html>
-```
-
-...by extending the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html) class
-
-```java
-import com.github.webdriverextensions.WebPage;
-
-public class LoginPage extends WebPage {
-
-    @FindBy(name = "username")
-    public WebElement usernameInput;
-    @FindBy(name = "password")
-    public WebElement passwordInput;
-    @FindBy(name = "remember-me")
-    public WebElement rememberMeCheckbox;
-    @FindBy(id = "login-buttom")
-    public WebElement loginButton;
-
-    @Override
-    public void open(Object... arguments) {
-        // Define how to open this page, e.g.
-        open("https://www.your-website-url.com/login");
-        assertIsOpen();
-    }
-
-    @Override
-    public void assertIsOpen(Object... arguments) {
-        // Define how to assert that this page is open, e.g.
-        assertTitleEquals("Login Page");
-        assertIsDisplayed(usernameInput);
-        assertIsDisplayed(passwordInput);
-        assertIsDisplayed(rememberMeCheckbox);
-        assertIsDisplayed(loginButton);
-    }
-}
-```
-...and then add and use it in your tests
-
-```java
-@RunWith(WebDriverRunner.class)
-@Firefox
-public class LoginPageTest {
-
-    // Add models to inject into test
-    LoginPage loginPage;
-
-    @Test
-    public void loginTest() {
-        open(loginPage); // Calls the open method defined in LoginPage
-        type("foo", loginPage.username);
-        type("bar", loginPage.password);
-        click(loginButtom);
-        assertIsNotOpen(loginPage); // Calls the assertIsNotOpen method in the abstract WebPage class which inverts the assertIsOpen method defined in LoginPage
-    }
-
-    ...
-
-}
-```
-
-Since the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html) class only implements a part of the the [Openable](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/internal/Openable.html) interface you have to implement the [open(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#open-java.lang.Object...-) and [assertIsOpen(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#assertIsOpen-java.lang.Object...-) methods yourself. As soon as this is done you can also call the [isOpen(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#isOpen-java.lang.Object...-), [isNotOpen(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#isNotOpen-java.lang.Object...-) and the [assertIsNotOpen(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#assertIsNotOpen-java.lang.Object...-) methods inherited from the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html) class.
-
-The [open(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#open-java.lang.Object...-) and [assertIsOpen(Object... arguments)](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html#assertIsOpen-java.lang.Object...-) methods can take any number of arguments and therefore it is possible to pass entity ids or other required data needed to load the page. E.g. a page showing a specific order
-
-```java
-public class OrderPage {
-
-    @FindBy(id = "order-number")
-    public WebElement orderNumber;
-    ...
-
-    @Override
-    public void open(Object... arguments) {
-        int orderNumberToOpen = (int) arguments[0];
-        System.err.println("https://www.your-website-url.com/order?orderid=" + orderNumberToOpen);
-        assertIsOpen(orderNumberToOpen);
-    }
-
-    @Override
-    public void assertIsOpen(Object... arguments) {
-        int orderNumberToAssert = (int) arguments[0];
-        assertTextEquals(orderNumberToAssert, orderNumber);
-        ...
-    }
-}
-```
-
-...and then use it in your test
-
-```java
-open(orderPage, 134523); // Calls the open method defined in OrderPage with the order number 134523 as an argument
-```
-
-There is also a [WebSite](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebSite.html) class which can be used if you would want to create a Site Object i.e. a model of the complete website. It is actually no difference between the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html) and the [WebSite](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebSite.html) class except the name.
-
-An alternative to using the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html) class is using the [WebRepository](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebRepository.html) class. The only difference is that it does not implement the [Openable](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/internal/Openable.html) interface and therefore there is no need to override and implement the `open(Object... arguments)` and `assertIsOpen(Object... arguments)` methods.
-
-Note that any class extending the [WebPage](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebPage.html), [WebSite](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebSite.html) or [WebRepository](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebRepository.html) class that are added as fields in the test will automatically be injected/instantiated if the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) is used. If you won't run your tests with the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) you can call the Selenium WebDriver `PageFactory.initElements` method and pass the [WebDriverExtensionFieldDecorator](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebDriverExtensionFieldDecorator.html) before running the test, e.g.
-
-```java
-PageFactory.initElements(new WebDriverExtensionFieldDecorator(yourDriver), this);
-```
-
-
-
-<br>
-
-### Model your page components with the [WebComponent](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebComponent.html)
-
-Model repeating html content, e.g. table rows
-
-```html
-<table id="playlist">
-     <tr>
-          <td class="track">Hey Joe</td>
-          <td class="artist">Jimi Hendrix</td>
-          <td class="time">3:30</td>
-          <td class="album">Are You Experienced</td>
-     </tr>
-     <tr>
-          <td class="track">Play with Fire</td>
-          <td class="artist">The Rolling Stones</td>
-          <td class="time">2:14</td>
-          <td class="album">The Last time</td>
-     </tr>
-
-     ...
-
-</table>
-```
-
-...by extending the [WebComponent](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebComponent.html)
-
-```java
-import com.github.webdriverextensions.WebComponent;
-
-public class PlaylistRow extends WebComponent {
-
-    @FindBy(className = "track")
-    public WebElement track;
-    @FindBy(className = "artist")
-    public WebElement artist;
-    @FindBy(className = "time")
-    public WebElement time;
-    @FindBy(className = "album")
-    public WebElement album;
-}
-```
-
-...and then include it as you include a WebElement
-
-```java
-@FindBy(css = "#playlist tr")
-public List<PlaylistRow> playlist;
-```
-
-...and then start using it
-
-```java
-assertTextEquals("Hey Joe", playlist.get(0).track); // Use WebElements in WebComponents
-click(playlist.get(0));                             // Use WebComponents as WebElements
-```
-
-Note that `@FindBy` annotation locators used inside a WebComponent have the WebComponent's html content as the search context. To locate html tags outside the WebComponent you could reset the search context by adding the [@ResetSearchContext](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/annotations/ResetSearchContext.html) annotation.
-
-If you wish to delegate the method calls of a WebComponent to an underlying WebElement you can do so by annotating a WebElement inside the WebComponent with the [@Delegate](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/annotations/Delegate.html) annotation.
-
-If you won't run your tests with the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) you must call the Selenium WebDriver `PageFactory.initElements` method and pass the [WebDriverExtensionFieldDecorator](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebDriverExtensionFieldDecorator.html) before running the test, e.g.
-```java
-PageFactory.initElements(new WebDriverExtensionFieldDecorator(yourDriver), this);
-```
-
-
-<br>
-
-### Make your test readable as instructions with the [Bot Pattern](https://code.google.com/p/selenium/wiki/BotStyleTests)
-
-Simply import the static [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) where you want to use it
-
-```java
-import static com.github.webdriverextensions.Bot.*;
-```
-
-...and start interacting with your web models
-
-```java
-open("https://www.your-website-url.com");   // Open urls
-type("testuser", usernameInput);            // Type into WebElements referencing text input tags
-type("ai78cGsT", passwordInput);
-uncheck(rememberMeCheckbox);                // Check and uncheck WebElements referencing checkbox input tags
-click(loginButton);                         // Click at WebElements
-
-open(settingsPage)                          // Open WebPages
-selectOption("Swedish", languageSelectBox); // Select options in WebElements referencing select tags
-```
-
-...and write your asserts
-
-```java
-assertIsOpen(homePage);                                        // Assert WebPages are open
-assertTextEquals("testuser", currentUser);                     // Assert text in WebElements equals
-assertTitleStartsWith("Wikipedia - ");                         // Assert title starts with
-assertCurrentUrlMatches("http://[a-z]{2,3}.wikipedia.org/.*"); // Assert current url matches regex
-assertHasClass("selected", homeTab);                           // Assert WebElement tags has class
-// ...type assert then bring up the list of all supported asserts with your IDE's autocompletion
-```
-
-...and conditional statements
-
-```java
-if (hasClass("selected", homeTab)) { // Check if WebElement tags has class
-    // ...do something
-}
-if (browserIsInternetExplorer()) {   // Check if browser is Internet Explorer
-    // ...handle cross browser difference
-}
-```
-
-...and wait for specific time and conditions
-
-```java
-waitFor(3, MINUTES);                                         // Wait for specific time
-waitForElementToDisplay(downloadCompletePopup, 30, SECONDS); // Wait for WebElements to display within specific time
-```
-
-...and use the driver
-
-```java
-System.out.println(driver().getPageSource());
-```
-
-...and take screenshots
-
-```java
-takeScreenshots("screenshotfilename") // Save a screenshot to the screenshots directory in the project root
-```
-
-For a list of provided [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) methods take a look at the [javadoc for the Bot class](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) or use the autocompletion tool of your IDE (usally with Ctrl + Space and then start typing).
-
-If you feel that some [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html) methods are missing please describe them in a [new GitHub issue](https://github.com/webdriverextensions/webdriverextensions/issues/new) or even better clone this repository, commit the new methods and create a [Pull Request](https://help.github.com/articles/using-pull-requests/).
-
-If you won't run your tests with the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html) make sure you set the driver in the [WebDriverExtensionsContext](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/WebDriverExtensionsContext.html) before using the [Bot](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/3.11.1/com/github/webdriverextensions/Bot.html)
-
-```java
-WebDriverExtensionsContext.setDriver(yourDriver);
-```
-
-There is now also a VaadinBot that can be used if testing an application using the [Vaadin Framework](https://vaadin.com/home)
-
-<br>
-
-### Create new projects with the [Maven Archetype](https://github.com/webdriverextensions/webdriverextensions-archetype-quickstart#webdriver-extension-archetype-quickstart)
-Open your terminal and run
-```sh
-mvn archetype:generate -DarchetypeGroupId=com.github.webdriverextensions -DarchetypeArtifactId=webdriverextensions-archetype-quickstart
-```
-
-...and answer the questions to generate
-```
-projectname
-├── drivers
-├── pom.xml
-└── src
-    ├── main
-    │   └── java
-    │       └── com
-    │           └── companyname
-    │               ├── SiteNameSite.java
-    │               ├── SiteNameSiteTest.java
-    │               ├── component
-    │               │   └── ExampleWebComponent.java
-    │               └── page
-    │                   └── MainPage.java
-    └── test
-        ├── java
-        │   └── com
-        │       └── companyname
-        │           └── MainPageTest.java
-        └── resources
-            └── logback-test.xml
-```
-
-No need to add any drivers since the webdriverextensions-maven-plugin is configured to download
-them for you!
-
-Simply just run the generated template test by executing
-```sh
-cd projectname
-mvn test
-```
-
-
-<br>
-
-# Javadoc
-The Javadoc of this project is available online hosted by javadoc.io. You can find the latest documentation over  [here](http://www.javadoc.io/doc/com.github.webdriverextensions/webdriverextensions). Please note that at the moment the documentation of the java classes and methods are limited (except for this documentation).
-
-
-<br>
-
-# Changelog
-#### 3.11.1 (2019 June 2)
-- BUGFIX Fixed issue with WebComponents getWrappedWebElement() [fixes issue #125](https://github.com/webdriverextensions/webdriverextensions/issues/125)
-
-#### 3.11.0 (2019 June 2)
-- SELENIUM UPDATE Updated selenium version to 3.141.59
-- DEPENDENCY UPDATE Updated htmlunit-driver to 2.35.1
-- DEPENDENCY UPDATE Updated jna-platform to 5.3.1
-- DEPENDENCY UPDATE Updated gson to 2.8.5
-- DEPENDENCY UPDATE Updated commons-lang3 to 3.9
-
-#### 3.10.0 (2017 February 3)
-- BUGFIX WebDriverRunner now creates test and handles surefire.rerunFailingTestsCount correctly([PR 120](https://github.com/webdriverextensions/webdriverextensions/pull/120) thanks to  thanks to [@Snipx](https://github.com/Snipx))
-- ENHANCEMENT Added Bot methods taking advanced screenshots ([PR 119](https://github.com/webdriverextensions/webdriverextensions/pull/119) thanks to  thanks to [@xinaiz](https://github.com/xinaiz))
-Added methods to Bot
-```java
-void takeScreenshotOf(WebElement element, String fileName)
-void takeScreenshotWithHighlight(WebElement element, String fileName)
-void takeScreenshotWithHighlight(WebElement element, int borderWidth, String fileName)
-void takeScreenshotWithHighlight(WebElement element, Color highlightColor, String fileName)
-void takeScreenshotWithHighlight(WebElement element, String fileName, int borderOffset)
-void takeScreenshotWithHighlight(WebElement element, int borderWidth, Color highlightColor, String fileName)
-void takeScreenshotWithHighlight(WebElement element, Color highlightColor, int borderOffset, String fileName)
-void takeScreenshotWithHighlight(WebElement element, int borderWidth, int borderOffset, String fileName)
-void takeScreenshotWithHighlight(WebElement element, int borderWidth, Color highlightColor, int borderOffset, String fileName)
-```
-
-#### 3.9.0 (2017 January 28)
-- ENHANCEMENT Added Bot methods for testing multiple tabs ([PR 118](https://github.com/webdriverextensions/webdriverextensions/pull/118) thanks to  thanks to [@xinaiz](https://github.com/xinaiz))
-Added methods to Bot
-```java
-void openInNewTab(WebElement element)
-String openInNewTabAndFocus(WebElement element)
-Set<String> availableWindowHandles()
-String currentWindowHandle()
-void switchToWindow(String handle)
-void waitForNewTabToOpen(Set<String> oldWindowHandles)
-void waitForNewTabToOpen(Set<String> oldWindowHandles, int seconds)
-void waitForPageToLoad()
-void waitForPageToLoad(int seconds)
-void executeForLink(WebElement link, Runnable function)
-void executeForLinks(Collection<WebElement> links, Runnable function)
-```
-
-#### 3.8.1 (2017 January 22)
-- ENHANCEMENT Added getters for wrappedWebComponent and delegatedWebComponent in WebComponents    
-- ENHANCEMENT Added support for @FindAll annotation
-- BUGFIX Fixed issue with scrollTo throwing exceptions for WebComponents
-
-#### 3.8.0 (2017 December 10)
-- SELENIUM UPDATE Updated selenium version to 3.8.1
-- DEPENDENCY UPDATE Updated htmlunit-driver to 2.28
-- DEPENDENCY ADDED Added jna-platform as a dependency since it was removed from selenium
-
-#### 3.7.0 (2017 October 27)
-- SELENIUM UPDATE Updated selenium version to 3.6.0
-
-#### 3.6.1 (2017 September 12)
-- SELENIUM UPDATE Updated selenium version to 3.5.3
-
-#### 3.6.0 (2017 August 17)
-- SELENIUM UPDATE Updated selenium version to 3.5.1
-
-#### 3.5.2 (2017 July 6)
-- ENHANCEMENT Make subclassing WebDriverRunner easier thanks to [@Snipx](https://github.com/Snipx)
-- BUGFIX Override getDescription() so that only filtered methods are added to the Description thanks to [@Snipx](https://github.com/Snipx)
-
-#### 3.5.1 (2017 May 18)
-- BUGFIX Fixed Edge driver can't find file /drivers/edgedriver-windows-64bit issue
-
-#### 3.5.0 (2017 April 26)
-- SELENIUM UPDATE Updated selenium version to 3.4.0
-
-#### 3.4.0 (2017 Mars 15)
-- SELENIUM UPDATE Updated selenium version to 3.3.1
-
-#### 3.3.0 (2017 February 26)
-- SELENIUM UPDATE Updated selenium version to 3.2.0
-
-#### 3.2.0 (2017 February 22)
-- SELENIUM UPDATE Updated selenium version to 3.1.0
-
-#### 3.1.0 (2017 February 15)
-- ENHANCEMENT Added possibility to disable/ignore specific browsers tests by system property "webdriverextensions.disabledbrowsers"
-E.g.
-```bash
-mvn install -Dwebdriverextensions.disabledbrowsers=firefox,chrome,safari
-```
-thanks to [@alexnb](https://github.com/alexnb)) and [@dve](https://github.com/dve)
-
-#### 3.0.1 (2016 September 20)
-- BUGFIX Fixed issue with Marionette/Geckodriver not loading pages (caused by WebDriverRunner using an incorrect property)
-
-#### 3.0.0 (2016 September 19)
-- SELENIUM UPDATE Selenium 3.0.1 support
-- ENHANCEMENT Added support for Marionette/Geckodriver
-
-#### 2.9.2 (2016 September 30)
-- BUGFIX Added missing htmlunit dependency
-- BUGFIX Normalized Bot.textIn(WebElement webElement) method to trim spaces so that Chrome and PhantomJs drivers behaves as other drivers according to WebElement docs  
-
-#### 2.9.1 (2016 September 28)
-- SELENIUM UPDATE Updated to latest htmlunit-driver version
-
-#### 2.9.0 (2016 September 28)
-- ENHANCEMENT Added support to run test against PhantomJS locally
-- ENHANCEMENT Implemented Filterable support for WebDriverRunner (makes it possible to run single test methods from IntelliJ)
-
-#### 2.8.2 (2016 September 27)
-- SELENIUM UPDATE Updated selenium version to 2.53.1
-
-#### 2.8.1 (2016 September 16)
-- BUGFIX Fixes invalid screenshot filename on Windows platform ([PR 68](https://github.com/webdriverextensions/webdriverextensions/pull/68) thanks to [@consulbit](https://github.com/consulbit))
-
-#### 2.8.0 (2016 July 2)
-- ENHANCEMENT Added support for [@Edge](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/2.8.0/com/github/webdriverextensions/junitrunner/annotations/Edge.html) browser
-
-#### 2.7.0 (2016 May 24)
-- ENHANCEMENT Added doubleClick(WebElement webElement), waitUntil(Predicate<WebDriver> perdicate) and waitUntil(Predicate<WebDriver> perdicate, long secondsToWait) to Bot (thanks to [@dve](https://github.com/dve))
-- ENHANCEMENT Added VaadinBot that can be used if testing an application using the [Vaadin Framework](https://vaadin.com/home) (thanks to [@dve](https://github.com/dve))
-
-#### 2.6.2 (2016 April 9)
-- ENHANCEMENT Added ISO date and time to screenshot filename
-
-#### 2.6.1 (2016 April 9)
-- Made private constructor public again for Bot, BotUtils and WebDriverExtensionsContext classes [fix issue #63](https://github.com/webdriverextensions/webdriverextensions/issues/63)
-
-#### 2.6.0 (2016 Mars 17)
-- SELENIUM UPDATE Updated selenium version to 2.53.0
-- ENHANCEMENT SonarQube improvements (thanks to [@faisal-hameed](https://github.com/faisal-hameed) at [@DevFactory](https://github.com/DevFactory))
-
-#### 2.5.0 (2016 February 14)
-- SELENIUM UPDATE Updated selenium version to 2.52.0
-- BUGFIX WebPage.assertIsNotOpen(Openable, Object...) is now working as it should ([PR 57](https://github.com/webdriverextensions/webdriverextensions/pull/57) thanks to [@cplaetzinger](https://github.com/dve))
-
-#### 2.4.0 (2016 February 4)
-- SELENIUM UPDATE Updated selenium version to 2.50.1
-
-#### 2.3.0 (2016 January 20)
-- SELENIUM UPDATE Updated selenium version to 2.49.0
-
-#### 2.2.0 (2015 November 6)
-- JUNIT UPDATE Updated JUnit version to 4.12
-- BUGFIX Fixes issue with wrong test description when using JUnit 4.12 and above ([PR 56](https://github.com/webdriverextensions/webdriverextensions/pull/56) thanks to [@cplaetzinger](https://github.com/cplaetzinger))
-- BUGFIX Corrected incorrect screenshot file extension from .jpg to .png ([PR 55](https://github.com/webdriverextensions/webdriverextensions/pull/55) thanks to [@cplaetzinger](https://github.com/cplaetzinger))
-
-#### 2.1.2 (2015 November 4)
-- BUGFIX Fixed that Chrome Driver path is not set to blank if only Internet Explorer Driver path is set with @DriverPath annoation
-
-#### 2.1.1 (2015 October 14)
-- SELENIUM UPDATE Updated selenium version to 2.48.2
-
-#### 2.1.0 (2015 October 9)
-- SELENIUM UPDATE Updated selenium version to 2.48.1
-- BUGFIX Fixed bug when @TakeScreenshotOnFailure takes more than one screenshot 
-of a failing test when more then one test fails in the same test class ([PR 52](https://github.com/webdriverextensions/webdriverextensions/pull/52) thanks to [@gunnee](https://github.com/gunnee))
-
-#### 2.0.1 (2015 September 30)
-- SELENIUM UPDATE Updated selenium version to 2.47.2
-
-#### 2.0.0 (2015 September 20)
-- JAVA 7 REQUIREMENT Now compiled with java 7 as target since selenium already does that since the 2.47.0 version
-
-#### 1.7.0 (2015 August 11)
-- SELENIUM UPDATE Updated selenium version to 2.47.1
-
-#### 1.6.0 (2015 June 9)
-- SELENIUM UPDATE Updated selenium version to 2.46.0
-
-#### 1.5.0 (2015 May 12)
-- FEATURE Added support for passing WebComponents as generic arguments to other WebComponents, WebPages and WebRepositories [fixes issue #50](https://github.com/webdriverextensions/webdriverextensions/issues/50). E.g.
-
-```java
-public class TableComponent<T extends WebComponent> extends WebComponent {
-    @FindBy(...)
-    public List<T> rowList;
-}
-
-public class ASearchResultType extends WebComponent {
-    // the model for the search result row
-}
-
-@FindBy(...)
-TableComponent<ASearchResultType> resultTable;
-```
-
-- ENHANCEMENT Added descriptive messages to general field instantiation exceptions thrown by WebDriverExtensions
-- BUGFIX Removed driver from ThreadLocal when test finished running or failed
-
-#### 1.4.0 (2015 Mars 23)
-- FEATURE Added Bot method waitForElementToDisplay with TimeUnit as parameter
-- FEATURE Added @ImplicitlyWait annotation to WebDriverRunner
-- FEATURE Added @TakeScreenshotOnFailure and @ScreenshotsPath annotations to WebDriverRunner
-- FEATURE Added takeScreenshot method to Bot
-- BUGFIX Made @DriverPath and @RemoteAddress annotations only applicable as class annotations
-
-#### 1.3.0 (2015 Mars 12)
-- SELENIUM UPDATE Updated selenium version to 2.45.0
-
-#### 1.2.1 (2014 December 3)
-- ENHANCEMENT Added descriptive messages to instantiation exceptions thrown by WebDriverExtensions when WebPage, WebSite and WebRepository class is either abstract, has no no args constructor or has no accessible constructor
-
-#### 1.2.0 (2014 October 29)
-- SELENIUM UPDATE Updated selenium version to 2.44.0
-- BUGFIX Using JUnit @Test timeouts will no longer cause WebDriverExtensionsContext.getDriver() method to throw an exception
-
-#### 1.1.0 (2014 September 15)
-- SELENIUM UPDATE Updated selenium version to 2.43.1
-- FEATURE Added waitForElementsToDisplay
-- FEATURE Added ignore case to text bot methods
-- BUGFIX @Delegate annotated field is now allowed to be private
-
-#### 1.0.1 (2014 September 4)
-- BUGFIX Swallowing 'No runnable methods' error from BlockJUnit4ClassRunner so empty tests are allowed
-- BUGFIX Made created abstract open method in WebPage and SitePage so eclipse wont complain about @Override annotation
-
-
-#### 1.0.0 (2014 September 2)
-- Initial release!
-
-
-
-<br>
-
-# Contributors
-- Thanks [Sauce Labs](https://saucelabs.com/) and [TestingBot](http://testingbot.com) for supporting this project with a free account for testing the remote setting for the [WebDriverRunner](http://static.javadoc.io/com.github.webdriverextensions/webdriverextensions/1.2.1/com/github/webdriverextensions/junitrunner/WebDriverRunner.html)
-- Thanks [Eniro](http://www.eniro.se/) for helping me develop and test this this framework
-
-
-
-
-<br>
-
-# License
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this work except in compliance with the License.
-You may obtain a copy of the License in the LICENSE file, or at:
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+The project requires that JAVA_HOME is set to a JDK 11 or a [toolchain](https://maven.apache.org/guides/mini/guide-using-toolchains.html) with version 11 is set up.
