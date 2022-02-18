@@ -42,6 +42,7 @@
         <eclipse.collections.version>7.1.0</eclipse.collections.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+    	<closeTestReports>true</closeTestReports>
     </properties>
 
     <licenses>
@@ -200,6 +201,7 @@
                 <configuration>
                     <!-- deal with Debian openjdk-8 issue (see https://issues.apache.org/jira/browse/SUREFIRE-1588) -->
                     <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+                	<disableXmlReport>${closeTestReports}</disableXmlReport>
                     <!--
                     NOTE: this should enable parallel testing, but it causes errors. Look into this.
                     <parallel>classes</parallel>
