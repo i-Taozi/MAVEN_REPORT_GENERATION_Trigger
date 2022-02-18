@@ -1,8 +1,0 @@
-configurable
- - path characters to reject on Windows/Linux
- - forbidden file names on Windows
- - Paths.get lazily create file system?
- - configure range of setTimes (past 2038)
- - security manager restrictions
- - add a way stop threads in Java EE / OSGi
- - test for old JVM behavior
