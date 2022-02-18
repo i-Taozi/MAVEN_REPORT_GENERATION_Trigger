@@ -1,153 +1,103 @@
-Dropwizard GELF
-===============
-[![Build Status](https://travis-ci.org/gini/dropwizard-gelf.svg?branch=master)](https://travis-ci.org/gini/dropwizard-gelf)
-[![Coverage Status](https://img.shields.io/coveralls/gini/dropwizard-gelf.svg)](https://coveralls.io/r/gini/dropwizard-gelf)
-[![Maven Central](https://img.shields.io/maven-central/v/net.gini.dropwizard/dropwizard-gelf.svg)](http://mvnrepository.com/artifact/net.gini.dropwizard/dropwizard-gelf)
+<img src="https://github.com/dianping/cat/raw/master/cat-home/src/main/webapp/images/logo/cat_logo03.png" width="50%">
 
-Addon for Dropwizard adding support for logging to a GELF-enabled server such as [Graylog](https://www.graylog.org/)
-or [logstash](http://logstash.net/) using [logstash-gelf](http://logging.paluch.biz/).
+**CAT**
+ [![GitHub stars](https://img.shields.io/github/stars/dianping/cat.svg?style=social&label=Star&)](https://github.com/dianping/cat/stargazers)
+ [![GitHub forks](https://img.shields.io/github/forks/dianping/cat.svg?style=social&label=Fork&)](https://github.com/dianping/cat/fork)
 
+### CAT 简介 
 
-Usage
------
+- CAT 是基于 Java 开发的实时应用监控平台，为美团点评提供了全面的实时监控告警服务。
+- CAT 作为服务端项目基础组件，提供了 Java, C/C++, Node.js, Python, Go 等多语言客户端，已经在美团点评的基础架构中间件框架（MVC框架，RPC框架，数据库框架，缓存框架等，消息队列，配置系统等）深度集成，为美团点评各业务线提供系统丰富的性能指标、健康状况、实时告警等。
+- CAT 很大的优势是它是一个实时系统，CAT 大部分系统是分钟级统计，但是从数据生成到服务端处理结束是秒级别，秒级定义是48分钟40秒，基本上看到48分钟38秒数据，整体报表的统计粒度是分钟级；第二个优势，监控数据是全量统计，客户端预计算；链路数据是采样计算。
 
-The Dropwizard GELF provides an `AppenderFactory` which is automatically registered in Dropwizard and will send log
-messages directly to your configured GELF-enabled server.
+### Cat 产品价值
 
+- 减少故障发现时间
+- 降低故障定位成本
+- 辅助应用程序优化
 
-Logging startup errors to Graylog
----------------------------------
+### Cat 优势
 
-In order to log startup errors (i. e. before the `GelfAppenderFactory` has been properly initialized) to a GELF-enabled
-server, the Dropwizard application has to run `GelfBootstrap.bootstrap()` in its `main` method and set a custom
-`UncaughtExceptionHandler` for the main thread.
+- 实时处理：信息的价值会随时间锐减，尤其是事故处理过程中
+- 全量数据：全量采集指标数据，便于深度分析故障案例
+- 高可用：故障的还原与问题定位，需要高可用监控来支撑
+- 故障容忍：故障不影响业务正常运转、对业务透明
+- 高吞吐：海量监控数据的收集，需要高吞吐能力做保证
+- 可扩展：支持分布式、跨 IDC 部署，横向扩展的监控系统
 
-    public static void main(String[] args) throws Exception {
-        GelfBootstrap.bootstrap(NAME, GELF_HOST, GELF_PORT, false);
-        Thread.currentThread().setUncaughtExceptionHandler(
-                UncaughtExceptionHandlers.loggingSystemExitBuilder(NAME, GELF_HOST)
-                        .port(GELF_PORT)
-                        .build());
+### 更新日志
 
-        new MyDropwizardApplication().run(args);
-    }
+- [**最新版本特性一览**](https://github.com/dianping/cat/wiki/new)
 
+    - 注意cat的3.0代码分支更新都发布在master上，包括最新文档也都是这个分支
+    - 注意文档请用最新master里面的代码文档作为标准，一些开源网站上面一些老版本的一些配置包括数据库等可能遇到不兼容情况，请以master代码为准，这份文档都是美团点评内部同学为这个版本统一整理汇总。内部同学已经核对，包括也验证过，如果遇到一些看不懂，或者模糊的地方，欢迎提交PR。
+    - 多语言客户端：Java、C/C++、Node.js、Python、Go [传送门](https://github.com/dianping/cat/tree/master/lib)
+        
+        * [**Java**](https://github.com/dianping/cat/blob/master/lib/java)
+        * [**C**](https://github.com/dianping/cat/blob/master/lib/c)
+        * [**C++**](https://github.com/dianping/cat/blob/master/lib/cpp)
+        * [**Python**](https://github.com/dianping/cat/blob/master/lib/python)
+        * [**Go**](https://github.com/dianping/cat/blob/master/lib/go)
+        * [**Node.js**](https://github.com/dianping/cat/blob/master/lib/node.js)
+        
+    - 消息采样聚合
+    - 序列化协议升级
+    - 全新文件存储引擎
+   
 
-Configuration
--------------
+### 监控模型：
 
-The Logback GELF appender can be configured using the provided `GelfConfiguration` class which basically mirrors the
-appender configuration outlined in the [logstash-gelf documentation](http://logging.paluch.biz/examples/logback.html).
+支持 Transaction、Event、Heartbeat、Metric 四种消息模型。 [**模型设计**](https://github.com/dianping/cat/wiki/model)
 
-Your YAML configuration could include the following snippet to configure the `GelfLoggingBundle`:
+### 模块简介
 
-```
-appenders:
-  - type: console
-  - type: gelf
-    host: udp:graylog.example.com
-    # port: 12201
-    # facility: MyApplication
-    # threshold: ALL
-    # originHost: my-shiny-host
-    extractStackTrace: true
-    filterStackTrace: true
-    includeFullMDC: true
-    includeLocation: true
-    additionalFields:
-      data_center: DC01
-      rack: R5C2
-      inception_year: 2016
-    additionalFieldTypes:
-      inception_year: long
-      request_id: long
-```
+#### 功能模块
 
+- cat-client: 客户端，上报监控数据
+- cat-consumer: 服务端，收集监控数据进行统计分析，构建丰富的统计报表
+- cat-alarm: 实时告警，提供报表指标的监控告警
+- cat-hadoop: 数据存储，logview 存储至 Hdfs
+- cat-home: 管理端，报表展示、配置管理等
 
-Configuration settings
-----------------------
+> 1. 根目录下 cat-client 模块以后不再维护，下个大版本更新计划移除。新版Java客户端参考：lib/java
+> 2. 管理端、服务端、告警服务均使用 cat-home 模块部署即可
 
-| Setting                | Default                    | Description                                                                                                                                           |
-| ---------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `enabled`              | `true`                     | Specify if logging to a GELF-compatible server should be enabled.                                                                                     |
-| `facility`             | [application name]         | The name of the application. Appears in the `facility` column in the Graylog web interface.                                                           |
-| `host`                 | [empty]                    | Hostname/IP-Address of the GELF-compatible server, see [host specification](#host-specification).                                                     |
-| `port`                 | `12201`                    | Port of the GELF-compatible server.                                                                                                                   |
-| `originHost`           | [FQDN hostname]            | Originating hostname.                                                                                                                                 |
-| `extractStackTrace`    | `false`                    | Send the stack-trace to the StackTrace field.                                                                                                         |
-| `filterStackTrace`     | `false`                    | Perform stack-trace filtering, see [Stack Trace Filter].                                                                                              |
-| `mdcProfiling`         | `false`                    | Perform Profiling (Call-Duration) based on [MDC] Data. See [MDC Profiling] for details.                                                               |
-| `additionalFields`     | [empty]                    | Map of additional static fields.                                                                                                                      |
-| `additionalFieldTypes` | [empty]                    | Map of type specifications for additional and [MDC] fields. See [Additional field types](#additional-field-types) for details.                        |
-| `mdcFields`            | [empty]                    | List of additional fields whose values are obtained from [MDC].                                                                                       |
-| `dynamicMdcFields`     | [empty]                    | Dynamic MDC Fields allows you to extract [MDC] values based on one or more regular expressions. The name of the MDC entry is used as GELF field name. |
-| `includeFullMdc`       | `false`                    | Include all fields from the [MDC].                                                                                                                    |
-| `includeLocation`      | `true`                     | Include source code location.                                                                                                                         |
-| `maximumMessageSize`   | `8192`                     | Maximum message size (in bytes). If the message size is exceeded, the appender will submit the message in multiple chunks (UDP only).                 |
-| `timestampPattern`     | `yyyy-MM-dd HH:mm:ss,SSSS` | Date/time pattern for the time field.                                                                                                                 |
+#### 其他模块
 
-[MDC]: http://logback.qos.ch/manual/mdc.html
-[MDC Profiling]: http://logging.paluch.biz/mdcprofiling.html
-[Stack Trace Filter]: http://logging.paluch.biz/stack-trace-filter.html
+- integration：cat和一些第三方工具集成的内容（此部分一部分是由社区贡献，一部分官方贡献）
+- lib：CAT 的客户端，包括 Java、C/C++、Python、Node.js、Go
+- script：CAT 数据库脚本
 
+### Quick Start
 
-### Host specification
+- [部署FAQ](https://github.com/dianping/cat/wiki/cat_faq)
 
-* `udp:hostname` for UDP transport, e. g. `udp:127.0.0.1, `udp:some.host.com` or just `some.host.com`.
-* `tcp:hostname` for TCP transport, e. g. `tcp:127.0.0.1` or `tcp:some.host.com`. See [TCP transport for logstash-gelf] for details.
-* `ssl:hostname` for TCP+SSL transport, e. g. `ssl:127.0.0.1` or `ssl:some.host.com`. See [TCP transport for logstash-gelf] for details.
-* `redis://[:password@]hostname:port/db-number#listname` for Redis transport. See [Redis transport for logstash-gelf] for details.
-* `redis-sentinel://[:password@]hostname:port/db-number?masterId=masterId#listname` for Redis transport with Sentinel lookup. See [Redis transport for logstash-gelf] for details.
-* `http://host[:port]/[path]` for HTTP transport, e. g. `https://127.0.0.1/gelf`. See [HTTP transport for logstash-gelf] for details.
+#### 服务端
 
-[TCP transport for logstash-gelf]: http://logging.paluch.biz/tcp.html
-[Redis transport for logstash-gelf]: http://logging.paluch.biz/redis.html
-[HTTP transport for logstash-gelf]: http://logging.paluch.biz/http.html
+- [集群部署](https://github.com/dianping/cat/wiki/readme_server)
+- [报表介绍](https://github.com/dianping/cat/wiki/readme_report)
+- [配置手册](https://github.com/dianping/cat/wiki/readme_config)
 
+### 项目设计
 
-### Additional field types
+- [项目架构](https://github.com/dianping/cat/wiki/overall)
+- [客户端设计](https://github.com/dianping/cat/wiki/client)
+- [服务端设计](https://github.com/dianping/cat/wiki/server)
+- [模型设计](https://github.com/dianping/cat/wiki/model)
 
-Supported types: `String`, `long`, `Long`, `double`, `Double` and `discover` (default if not specified).
+### Copyright and License
 
+[Apache 2.0 License.](/LICENSE)
 
-Maven Artifacts
----------------
+### CAT 接入公司
 
-This project is available on Maven Central. To add it to your project simply add the following dependencies to your POM:
+![Alt text](cat-home/src/main/webapp/images/logo/companys.png)
 
-    <dependency>
-      <groupId>net.gini.dropwizard</groupId>
-      <artifactId>dropwizard-gelf</artifactId>
-      <version>1.3.0-1</version>
-    </dependency>
+更多接入公司，欢迎在 <https://github.com/dianping/cat/issues/753> 登记
 
+### 联系我们
 
-Support
--------
+我们需要知道你对Cat的一些看法以及建议：
 
-Please file bug reports and feature requests in [GitHub issues](https://github.com/gini/dropwizard-gelf/issues).
-
-
-Acknowledgements
-----------------
-
-Thanks to Nick Telford for his [initial version](https://gist.github.com/dd5e000c3327484540a8) of the `GraylogBundle`.
-
-
-Contributors
-------------
-
-* [Daniel Scott](https://github.com/danieljamesscott)
-* [Michal Svab](https://github.com/msvab)
-* [Christian Rigdon](https://github.com/Oakie3CR)
-* [Patrick Brückner](https://github.com/madmuffin1)
-
-
-License
--------
-
-Copyright (c) 2012-2013 smarchive GmbH, 2013-2018 Gini GmbH, 2015-2018 Jochen Schalanda
-
-This library is licensed under the Apache License, Version 2.0.
-
-See http://www.apache.org/licenses/LICENSE-2.0.html or the [LICENSE](LICENSE) file in this repository for the full license text.
+- Mail: cat@dianping.com，
+- [**Issues**](https://github.com/dianping/cat/issues)
