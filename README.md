@@ -1,48 +1,52 @@
-# What is BlackLab?
+teiid
+=====
 
-[BlackLab](http://inl.github.io/BlackLab/) is a corpus retrieval engine built on top of [Apache Lucene](http://lucene.apache.org/). It allows fast, complex searches with accurate hit highlighting on large, tagged and annotated, bodies of text. It was developed at the Institute of Dutch Lexicology (INL) to provide a fast and feature-rich search
-interface on our historical and contemporary text corpora.
+[![Build Status](https://api.travis-ci.com/teiid/teiid.svg?branch=master)](https://travis-ci.org/teiid/teiid)
+[![Join the chat at https://gitter.im/teiid](https://badges.gitter.im/teiid/teiid.svg)](https://gitter.im/teiid?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-We're also working on BlackLab Server, a web service interface to BlackLab, so you can access it from any programming language. BlackLab Server is included in the repository as well.
+Teiid is a data virtualization system that allows applications to use data from multiple, heterogeneous data stores.
 
-BlackLab and BlackLab Server are licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+## Useful Links
+- Website - http://teiid.org
+- Latest Documentation - http://teiid.github.io/teiid-documents/master/content/
+- Documentation Project - https://github.com/teiid/teiid-documents
+- JIRA Issues -  https://issues.jboss.org/browse/TEIID
+- User Forum - https://community.jboss.org/en/teiid?view=discussions
+- Wiki - https://community.jboss.org/wiki/TheTeiidProject
 
-To learn how to index and search your data, see the [official project site](http://inl.github.io/BlackLab/).
+## To build Teiid
+- install JDK 1.9 or higher
+- install maven 3.2+ - http://maven.apache.org/download.html
+- Create a github account and fork Teiid
 
-## Using BlackLab with Docker
+Enter the following:
 
-An experimental Docker setup is provided now. It will likely change in the future.
+	$ git clone https://github.com/<yourname>/teiid.git
+	$ cd teiid
+	$ mvn clean install -P dev -s settings.xml
+	
+you can find the deployment artifacts in the "teiid/build/target" directory once the build is completed.
 
-We assume here that you are familiar with the BlackLab indexing process; see [indexing with BlackLab](https://inl.github.io/BlackLab/indexing-with-blacklab.html) to learn more.
+## Travis Builds
 
-Create a file named `test.env` with your indexing configuration:
+Teiid includes a travis build config.  By default it performs only an "install" on every commit.  It allows for a
+cron based build to be configured as well for deploying snapshots.  The snapshot build requires add the environment
+variables SONATYPE_USERNAME and SONATYPE_PASSWORD that should set to the user access token values of an
+authorized sonatype account.
 
-```ini
-IMAGE_VERSION=latest
-BLACKLAB_FORMATS_DIR=/path/to/my/formats
-INDEX_NAME=my-index
-INDEX_FORMAT=my-file-format
-INDEX_INPUT_DIR=/path/to/my/input-files
-JAVA_OPTS=-Xmx10G
-```
+## Teiid for WildFly
 
-To index your data:
+Teiid for WildFly may be built by including the wildfly profile with the relevant build command.  For example:
 
-```bash
-docker-compose --env-file test.env run --rm indexer
-```
+    $ mvn clean install -P dev,wildfly -s settings.xml
+    
+The Teiid WildFly kits will then be located under wildfly/wildfly-build/target
 
-Now start the server:
+Licenses
+-------
 
-```bash
-docker-compose up -d
-```
+The default license for all submodules is the [Apache Software License (ASL) v2.0][1]
 
-Your index should now be accessible at http://localhost:8080/blacklab-server/my-index.
+Where applicable individual submodules will provide additional copyright and license information.
 
-
-See the [Docker README](docker/README.md) for more details.
-
-## Special thanks
-
-* ej-technologies for the <a href="https://www.ej-technologies.com/products/jprofiler/overview.html">JProfiler Java profiler</a>
+[1]: view-source:https://www.apache.org/licenses/LICENSE-2.0
