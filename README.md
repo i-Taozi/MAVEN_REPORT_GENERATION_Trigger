@@ -1,165 +1,116 @@
-# A Jenkins API Client for Java
+# Datastax Java Driver for Apache Cassandra®
 
-[![MIT Licence](https://img.shields.io/github/license/jenkinsci/java-client-api.svg?label=License)](http://opensource.org/licenses/MIT)
-[![Maven Central](https://img.shields.io/maven-central/v/com.offbytwo.jenkins/jenkins-client.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.offbytwo.jenkins%22%20a%3A%22jenkins-client%22)
-[![Build Status](https://travis-ci.org/jenkinsci/java-client-api.svg?branch=master)](https://travis-ci.org/jenkinsci/java-client-api)
-[![Javadocs](https://javadoc.io/badge/com.offbytwo.jenkins/jenkins-client.svg?color=blue)](https://javadoc.io/doc/com.offbytwo.jenkins/jenkins-client)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.datastax.oss/java-driver-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.datastax.oss/java-driver-core)
 
-## Important Note
+*If you're reading this on github.com, please note that this is the readme for the development 
+version and that some features described here might not yet have been released. You can find the
+documentation for latest version through [DataStax Docs] or via the release tags, e.g. 
+[4.13.0](https://github.com/datastax/java-driver/tree/4.13.0).*
 
-The Jenkins API Client For Java has now moved under the umbrella of the Jenkins GitHub Organization.
+A modern, feature-rich and highly tunable Java client library for [Apache Cassandra®] \(2.1+) and 
+[DataStax Enterprise] \(4.7+), and [DataStax Astra], using exclusively Cassandra's binary protocol
+and Cassandra Query Language (CQL) v3.
 
-## What is the "Jenkins API Client for Java"?
+[DataStax Docs]: http://docs.datastax.com/en/developer/java-driver/
+[Apache Cassandra®]: http://cassandra.apache.org/
+[DataStax Enterprise]: https://www.datastax.com/products/datastax-enterprise
+[DataStax Astra]: https://www.datastax.com/products/datastax-astra
 
-This library is just a piece of java code which uses the REST API of jenkins.
-This means you can trigger builds, extract informations about jobs or builds
-etc. The information you can extract will be represented in java objects which
-you can reuse for other purposes or integrate this library into other parts for
-a higher level of integration.
- 
-## Getting Started
+## Getting the driver
 
-If you like to use this library you need to add the library as a dependency
-to your project. This can be done by using a Maven dependency like the following: 
-
-```xml
-<dependency>
-  <groupId>com.offbytwo.jenkins</groupId>
-  <artifactId>jenkins-client</artifactId>
-  <version>0.3.8</version>
-</dependency>
-```
-
-This can also being done by defining a Gradle dependency like this:
-
-```
-compile 'com.offbytwo.jenkins:jenkins-client:0.3.8'
-```
-
-Starting with a future release 0.4.0 the groupId/artifactId will change (NOT YET DONE!)
+The driver artifacts are published in Maven central, under the group id [com.datastax.oss]; there
+are multiple modules, all prefixed with `java-driver-`.
 
 ```xml
 <dependency>
-  NOT YET FINALIZED NOR RELEASED !!!
-  <groupId>org.jenkins-ci.lib</groupId>
-  <artifactId>java-client-api</artifactId>
-  <version>0.4.0</version>
+  <groupId>com.datastax.oss</groupId>
+  <artifactId>java-driver-core</artifactId>
+  <version>${driver.version}</version>
+</dependency>
+
+<dependency>
+  <groupId>com.datastax.oss</groupId>
+  <artifactId>java-driver-query-builder</artifactId>
+  <version>${driver.version}</version>
+</dependency>
+
+<dependency>
+  <groupId>com.datastax.oss</groupId>
+  <artifactId>java-driver-mapper-runtime</artifactId>
+  <version>${driver.version}</version>
 </dependency>
 ```
 
-## Usage
+Note that the query builder is now published as a separate artifact, you'll need to add the
+dependency if you plan to use it.
 
-The `com.offbytwo.jenkins.JenkinsServer` class provides the main entry
-point into the API. You can create a reference to the Jenkins server
-given its location and (optionally) a username and password/token.
+Refer to each module's manual for more details ([core](manual/core/), [query
+builder](manual/query_builder/), [mapper](manual/mapper)).
 
-```java
-JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:8080/jenkins"), "admin", "password")
-```
+[com.datastax.oss]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.datastax.oss%22
 
-At the top level you can access all of the currently defined
-jobs. This returns a map of job names (in lower case) to jobs.
+## Compatibility
 
-```java
-Map<String, Job> jobs = jenkins.getJobs()
-```
+The driver is compatible with Apache Cassandra® 2.1 and higher, DataStax Enterprise 4.7 and
+higher, and DataStax Astra.
 
-The Job class provides only summary information (name and url). You can retrieve details as follows
+It requires Java 8 or higher.
 
-```java
-JobWithDetails job = jobs.get("My Job").details()
-```
+Disclaimer: Some DataStax/DataStax Enterprise products might partially work on big-endian systems,
+but DataStax does not officially support these systems.
 
-The `JobWithDetails` class provides you with access to the list of
-builds (and related information such as the first, last, successful,
-etc) and upstream and downstream projects.
+## Connecting to DataStax Astra
 
-## Running Tests
-To run only unit tests without invoking the integration tests use the following command:
+The driver comes with built-in support for Astra, DataStax's cloud-native Cassandra-as-a-service
+offering. See the dedicated [manual page](manual/cloud/) for more details.
 
-```
-mvn clean install -DskipITs
-```
+## Migrating from previous versions
 
-## Running Integration Tests
-To run integration tests simply start
+Java driver 4 is **not binary compatible** with previous versions. However, most of the concepts
+remain unchanged, and the new API will look very familiar to 2.x and 3.x users.
 
-```
-mvn -Prun-its clean verify
-```
+See the [upgrade guide](upgrade_guide/) for details.
 
-There is also a module which contains [integration tests][integration-tests] 
-which are running with a special version of Jenkins
-within a Docker container to check several aspects of the API which can't be
-covered by the usual integration tests.
+## Useful links
 
-## Release Notes
+* [Manual](manual/)
+* [API docs]
+* Bug tracking: [JIRA]
+* [Mailing list]
+* Twitter: [@dsJavaDriver] tweets Java driver releases and important announcements (low frequency).
+    [@DataStaxEng] has more news, including other drivers, Cassandra, and DSE.
+* [Changelog]
+* [FAQ]
 
-You can find details about the different releases in the [Release Notes](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md).
-
- * [Release 0.3.9 NOT RELEASED YET](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-039).
- * [Release 0.3.8](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-038).
- * [Release 0.3.7](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-037).
- * [Release 0.3.6](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-036).
- * [Release 0.3.5](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-035).
- * [Release 0.3.4](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-034).
- * [Release 0.3.3](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-033).
- * [Release 0.3.2](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-032).
- * [Release 0.3.1](https://github.com/jenkinsci/java-client-api/blob/master/ReleaseNotes.md#release-031).
-
-## Contribution
-
-### Creating Issues
-
-If you find a problem please create an 
-[issue in the ticket system with the component `java-client-api`](https://issues.jenkins-ci.org/projects/JENKINS/)
-and describe what is going wrong or what you expect to happen.
-If you have a full working example or a log file this is also helpful.
-You should of course describe only a single issue in a single ticket and not 
-mixing up several different things into a single issue.
-
-### Creating a Pull Request
-
-Before you create a pull request it is necessary to create an issue in
-the [ticket system before with the component `java-client-api`](https://issues.jenkins-ci.org/browse/JENKINS)
-and describe what the problem is or what kind of feature you would like
-to add. Afterwards you can create an appropriate pull request.
-
-It is required if you want to get a Pull request to be integrated into please
-squash your commits into a single commit which references the issue in the
-commit message which looks like this:
-
-```
-Fixed #Issue
- o Description.
-```
-
-This makes it simpler to merge it and this will also close the
-appropriate issue automatically in one go. This make the life as 
-maintainer a little bit easier.
-
-A pull request has to fulfill only a single ticket and should never
-create/add/fix several issues in one, cause otherwise the history is hard to
-read and to understand and makes the maintenance of the issues and pull request
-hard or to be honest impossible.
-
-Furthermore it is necessary to create appropriate entries into the `ReleaseNotes.md`
-file as well.
-
-
-## Help & Questions
-
-You can ask questions in the [mailing list](https://groups.google.com/d/forum/java-client-api)
- which is also intended as discussion forum for development.
-
-## Generated Site
-
-http://jenkinsci.github.io/java-client-api/
+[API docs]: https://docs.datastax.com/en/drivers/java/4.13
+[JIRA]: https://datastax-oss.atlassian.net/browse/JAVA
+[Mailing list]: https://groups.google.com/a/lists.datastax.com/forum/#!forum/java-driver-user
+[@dsJavaDriver]: https://twitter.com/dsJavaDriver
+[@DataStaxEng]: https://twitter.com/datastaxeng
+[Changelog]: changelog/
+[FAQ]: faq/
 
 ## License
 
-Copyright (C) 2013, Cosmin Stejerean, Karl Heinz Marbaise, and contributors.
+&copy; DataStax, Inc.
 
-Distributed under the MIT license: http://opensource.org/licenses/MIT
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-[integration-tests]: https://github.com/jenkinsci/java-client-api/tree/master/jenkins-client-it-docker
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+----
+
+DataStax is a registered trademark of DataStax, Inc. and its subsidiaries in the United States 
+and/or other countries.
+
+Apache Cassandra, Apache, Tomcat, Lucene, Solr, Hadoop, Spark, TinkerPop, and Cassandra are 
+trademarks of the [Apache Software Foundation](http://www.apache.org/) or its subsidiaries in
+Canada, the United States and/or other countries. 
