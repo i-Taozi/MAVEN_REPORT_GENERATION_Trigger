@@ -1,4 +1,7 @@
+sudo: false
 language: java
-script: mvn clean verify -Dgpg.skip
-install:
-  -
+after_success:
+  - mvn -B jacoco:report coveralls:report
+jdk:
+  - openjdk8
+  - openjdk11
