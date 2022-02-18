@@ -1,8 +1,7 @@
-target
+target/
+.classpath
+.project
 .settings
-
-# IntelliJ IDEA
 .idea/
 *.iml
-*.ipr
-*.iws
+demo-dist/
