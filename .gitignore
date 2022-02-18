@@ -1,21 +1,31 @@
-# Generated Files #
-target/
-.settings/
-*.class
-entityscanner-plug/dependency-reduced-pom.xml
-.DS_Store
-morphia/.DS_Store
-release.properties
+# Maven build output
+target
+bin
 
-.idea
-.classpath
+# Eclipse project settings
+.settings
 .project
-*.iml
-*.tag
-*.next
-*.releasebackup
+.classpath
+.factorypath
+/.apt_generated/
+/.apt_generated_tests/
 
-# Package Files #
-*.jar
-*.war
-*.ear
+# IntelliJ IDEA project settings (old and new)
+*.iml
+.idea
+
+# VS Code files
+.vscode
+
+# vi temporary files
+*.swp
+
+# log files, such as JVM crash files
+*.log
+
+
+# vscode project settings
+.factorypath
+
+# Exclude *.env files except default .env
+?*.env

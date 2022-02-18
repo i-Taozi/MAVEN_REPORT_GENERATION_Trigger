@@ -1,99 +1,48 @@
-### This Project Has Moved
+# What is BlackLab?
 
-Please be aware that this fork has been officially superceded by one driven by MongoDB, Inc.
+[BlackLab](http://inl.github.io/BlackLab/) is a corpus retrieval engine built on top of [Apache Lucene](http://lucene.apache.org/). It allows fast, complex searches with accurate hit highlighting on large, tagged and annotated, bodies of text. It was developed at the Institute of Dutch Lexicology (INL) to provide a fast and feature-rich search
+interface on our historical and contemporary text corpora.
 
-As a consequence this fork is really not needed. You are strongly encouraged to adopt https://github.com/mongodb/morphia instead.
+We're also working on BlackLab Server, a web service interface to BlackLab, so you can access it from any programming language. BlackLab Server is included in the repository as well.
 
-Bugs and improvements should be submitted to that project.
+BlackLab and BlackLab Server are licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
-This project will remain here but not actively maintained.
+To learn how to index and search your data, see the [official project site](http://inl.github.io/BlackLab/).
 
-Once again, please visit https://github.com/mongodb/morphia from now on.
+## Using BlackLab with Docker
 
-### Basic Introduction
+An experimental Docker setup is provided now. It will likely change in the future.
 
-Morphia provides an annotation-driven approach to mapping POJO based entities into and out of MongoDB. As such, Morphia is an ODM (or Object Document Mapper).
+We assume here that you are familiar with the BlackLab indexing process; see [indexing with BlackLab](https://inl.github.io/BlackLab/indexing-with-blacklab.html) to learn more.
 
-To use, add Morphia to your Java SE or EE project alongside the mongo-java-driver (which Morphia depends on). Then, create POJOs representing your entities just like you would with JPA entities. Finally, either use Morphia's Datastore interface to store and retrieve entities, or hand that responsibility to a type-safe DAO that can extend from the shipped BasicDAO.
+Create a file named `test.env` with your indexing configuration:
 
-### Downloads
-
-*Jar files* are downloadable from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.jmkgreen.morphia%22).
-
-*Maven* users: Releases are available in Central. Snapshots are available via [OSS Sonatype](https://oss.sonatype.org).
-
-<table>
-	<tr>
-		<th colspan="2">Maven Dependency</td>
-	</tr>
-	<tr>
-		<td>Group ID</td><td>com.github.jmkgreen.morphia</td>
-
-	</tr>
-		<td>Artifact ID</td><td>morphia</td>
-	</tr>
-	<tr>
-		<td>Version</td><td>1.2.3</td>
-	</tr>
-</table>
-
-You can paste the following into your pom.xml:
-```
-<dependency>
-    <groupId>com.github.jmkgreen.morphia</groupId>
-    <artifactId>morphia</artifactId>
-    <version>1.2.3</version>
-</dependency>
+```ini
+IMAGE_VERSION=latest
+BLACKLAB_FORMATS_DIR=/path/to/my/formats
+INDEX_NAME=my-index
+INDEX_FORMAT=my-file-format
+INDEX_INPUT_DIR=/path/to/my/input-files
+JAVA_OPTS=-Xmx10G
 ```
 
-### Documentation
+To index your data:
 
-The [wiki](https://github.com/jmkgreen/morphia/wiki) has quite a lot of good example code.
-It was copied over from the original GoogleCode site.
+```bash
+docker-compose --env-file test.env run --rm indexer
+```
 
-Maven Site docs are [here](http://jmkgreen.github.com/morphia).
+Now start the server:
 
-JavaDoc packages are available for more detailed IDE-based help.
+```bash
+docker-compose up -d
+```
 
-GitHub gists are welcomed from contributors.
+Your index should now be accessible at http://localhost:8080/blacklab-server/my-index.
 
-### Testing
 
-jUnit tests form part of this project. If these are green, it's shippable!
+See the [Docker README](docker/README.md) for more details.
 
-### Bugs / Support
+## Special thanks
 
-The original [Google Group](http://groups.google.com/group/morphia) remains active for discussion, although please take care to note if you are using the original project's code or the code from this fork.
-
-Please use the GitHub issues tracker to report problems and make requests. A jUnit test case illustrating a bug has a higher chance of getting a fix that a more vague text description of course.
-
-### Contributions
-
-Fork this project, do you work, and ask for a pull request!
-
-### Building
-
-You will need:
-
-* JDK 1.5 or better (1.6 and 1.7 are tested)
-* Mongod running on localhost, on the default port.
-
-### License
-
-Apache, v2.
-
-### History
-
-This project is a fork of http://code.google.com/p/morphia/, taken from SVN trunk at revision 1826 (Jul 2012). This original work was authored by Scott Hernandez et al.
-
-The intention of this fork is to:
-
-1. Improve the documentation
-2. Maintain compatibility with newer MongoDB driver releases
-3. Fix and improve the code
-
-### Travis Continuous Integration Build Status
-
-Hopefully this thing is routinely green. Travis-CI monitors new code to this project and tests it on a variety of JDKs.
-
-[![Build Status](https://secure.travis-ci.org/jmkgreen/morphia.png?branch=master)](https://travis-ci.org/jmkgreen/morphia)
+* ej-technologies for the <a href="https://www.ej-technologies.com/products/jprofiler/overview.html">JProfiler Java profiler</a>
