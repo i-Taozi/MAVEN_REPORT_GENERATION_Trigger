@@ -1,27 +1,23 @@
-*.class
 
-# Package Files #
-*.jar
-*.war
-*.ear
+.classpath
 
-# Mac OS X
+.project
+
+.settings
+
+target
+.gitignore~
+
 .DS_Store
 
-# Eclipse #
-.project
-.classpath
-.settings/
+dependency-reduced-pom.xml
 
-# IntelliJ
-.idea/
-*.iml
-*.ipr
-*.iws
+pom.xml.versionsBackup
 
-target/
-/target
-/bin/
-
-.gradle/
-build/
+bin
+.idea
+nb-configuration.xml
+nbactions.xml
+pom.xml.orig
+v-leaflet.iml
+drivers
