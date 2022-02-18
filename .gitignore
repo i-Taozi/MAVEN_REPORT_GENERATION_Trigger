@@ -1,31 +1,19 @@
-# Maven build output
+build-full.bat
 target
-bin
-
-# Eclipse project settings
 .settings
-.project
 .classpath
-.factorypath
-/.apt_generated/
-/.apt_generated_tests/
+.project
+.metadata
+.DS_Store
+*.class
+*.pyc
 
-# IntelliJ IDEA project settings (old and new)
+/.metadata/
+
+# Intellij
+.idea/
 *.iml
-.idea
 
-# VS Code files
-.vscode
-
-# vi temporary files
-*.swp
-
-# log files, such as JVM crash files
-*.log
-
-
-# vscode project settings
-.factorypath
-
-# Exclude *.env files except default .env
-?*.env
+# Cucumber Testing artifacts
+cucumber-report
+.mvn
